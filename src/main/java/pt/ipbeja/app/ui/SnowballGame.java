@@ -33,7 +33,7 @@ public class SnowballGame extends Application {
 
         Scene scene = new Scene(grid, 7 * CELL_SIZE, 5 * CELL_SIZE);
 
-        // Detetar teclas e mover o monstro com método do modelo
+        // Detetar teclas e mover o monstro com méto_do do modelo  TODO PROVAVELMENTE FICA MELHOR COM CLIQUES EM VEZ DE TECLADO sd
         scene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.UP) {
                 model.moveMonster(MonsterDirections.UP);
