@@ -61,6 +61,7 @@ public class Snowball extends MobileElement {
      * @param base the snowball on which this one will be stacked
      * @return true if stacking is valid according to size
      */
+    
     public boolean canBeStackedOn(Snowball base) {
         return (this.status == SnowballStatus.SMALL && base.status == SnowballStatus.MEDIUM) ||
                 (this.status == SnowballStatus.MEDIUM && base.status == SnowballStatus.LARGE);
