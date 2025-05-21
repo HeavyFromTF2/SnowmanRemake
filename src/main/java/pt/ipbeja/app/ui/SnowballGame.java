@@ -26,80 +26,96 @@ public class SnowballGame extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        this.model = new BoardModel(5, 7); // tabuleiro 5x7
+        this.model = new BoardModel(5, 7);
         this.grid = new GridPane();
 
         drawBoard();
 
         Scene scene = new Scene(grid, 7 * CELL_SIZE, 5 * CELL_SIZE);
-
-        // Detetar teclas e mover o monstro com méto_do do modelo  TODO PROVAVELMENTE FICA MELHOR COM CLIQUES EM VEZ DE TECLADO sd
-        scene.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.UP) {
-                model.moveMonster(MonsterDirections.UP);
-                currentDirection = MonsterDirections.UP;
-            }
-            if (event.getCode() == KeyCode.DOWN) {
-                model.moveMonster(MonsterDirections.DOWN);
-                currentDirection = MonsterDirections.DOWN;
-            }
-            if (event.getCode() == KeyCode.LEFT) {
-                model.moveMonster(MonsterDirections.LEFT);
-                currentDirection = MonsterDirections.LEFT;
-            }
-            if (event.getCode() == KeyCode.RIGHT) {
-                model.moveMonster(MonsterDirections.RIGHT);
-                currentDirection = MonsterDirections.RIGHT;
-            }
-            drawBoard();
-        });
-
         primaryStage.setTitle("Snowball Game");
         primaryStage.setScene(scene);
         primaryStage.show();
-
-        // Necessário para receber eventos de teclado
-        scene.getRoot().requestFocus();
     }
 
     /**
-     * Atualiza o tabuleiro gráfico com base na posição do monstro e conteúdo do chão.
+     * Redraws the full board grid.
      */
     private void drawBoard() {
         grid.getChildren().clear();
+        int rows = model.getRowCount();
+        int cols = model.getColCount();
 
-        for (int row = 0; row < model.getRowCount(); row++) {
-            for (int col = 0; col < model.getColCount(); col++) {
-                ImageView imageView = new ImageView();
-                imageView.setFitWidth(CELL_SIZE);
-                imageView.setFitHeight(CELL_SIZE);
-
-                String imagePath;
-
-                if (model.getMonsterRow() == row && model.getMonsterCol() == col) {
-                    String directionName = currentDirection.name().toLowerCase(); // ex: "down", "up", etc.
-                    imagePath = "/images/monster_" + directionName + ".png"; // ex: "/images/monster_down.png"
-                } else {
-                    PositionContent content = model.getPositionContent(row, col);
-                    switch (content) {
-                        case SNOW -> imagePath = "/images/snow.png";
-                        case BLOCK -> imagePath = "/images/block.png";
-                        case SNOWMAN -> imagePath = "/images/snowman_complete.png";
-                        case NO_SNOW -> imagePath = "/images/no_snow.png";
-                        default -> imagePath = "/images/no_snow.png";
-                    }
-                }
-
-                try {
-                    Image img = new Image(Objects.requireNonNull(getClass().getResource(imagePath)).toExternalForm(), CELL_SIZE, CELL_SIZE, false, true);
-                    imageView.setImage(img);
-                } catch (NullPointerException e) {
-                    System.err.println("Erro: imagem não encontrada -> " + imagePath);
-                }
-
-                grid.add(imageView, col, row);
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                grid.add(createCell(row, col), col, row);
             }
         }
+    }
+
+    /**
+     * Creates a single cell (ImageView) with image and click handler.
+     *
+     * @param row the row index
+     * @param col the column index
+     * @return the ImageView representing this cell
+     */
+    private ImageView createCell(int row, int col) {
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(CELL_SIZE);
+        imageView.setFitHeight(CELL_SIZE);
+
+        String imagePath = getImagePath(row, col);
+
+        // Attempts to load the cell image; prints error if image not found
+        try {
+            Image img = new Image(Objects.requireNonNull(getClass().getResource(imagePath)).toExternalForm(),
+                    CELL_SIZE, CELL_SIZE, false, true);
+            imageView.setImage(img);
+        } catch (NullPointerException e) {
+            System.err.println("Erro: imagem não encontrada -> " + imagePath);
+        }
+
+        imageView.setOnMouseClicked(event -> handleCellClick(row, col));
+        return imageView;
+    }
+
+    /**
+     * Determines the correct image path for a given cell.
+     */
+    private String getImagePath(int row, int col) {
+        if (model.getMonsterRow() == row && model.getMonsterCol() == col) {
+            String directionName = currentDirection.name().toLowerCase();
+            return "/images/monster_" + directionName + ".png";
+        }
+        return switch (model.getPositionContent(row, col)) {
+            case SNOW -> "/images/snow.png";
+            case BLOCK -> "/images/block.png";
+            case SNOWMAN -> "/images/snowman_complete.png";
+            case NO_SNOW -> "/images/no_snow.png";
+            default -> "/images/no_snow.png";
+        };
+    }
+
+    /**
+     * Handles clicks on a board cell. Moves the monster if valid.
+     */
+    private void handleCellClick(int targetRow, int targetCol) {
+        int currentRow = model.getMonsterRow();
+        int currentCol = model.getMonsterCol();
+
+        int dRow = targetRow - currentRow;
+        int dCol = targetCol - currentCol;
+
+        if (Math.abs(dRow) + Math.abs(dCol) != 1) return;
+        if (!model.canMoveTo(targetRow, targetCol)) return;
+
+        if (dRow == -1) currentDirection = MonsterDirections.UP;
+        if (dRow == 1) currentDirection = MonsterDirections.DOWN;
+        if (dCol == -1) currentDirection = MonsterDirections.LEFT;
+        if (dCol == 1) currentDirection = MonsterDirections.RIGHT;
+
+        model.moveMonster(currentDirection);
+        drawBoard();
     }
 
     public static void main(String[] args) {

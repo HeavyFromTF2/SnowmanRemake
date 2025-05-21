@@ -79,6 +79,15 @@ public class BoardModel {
     }
 
     /**
+     * Check if the monster can move to a given position (must be inside board and not a BLOCK).
+     */
+    public boolean canMoveTo(int row, int col) {
+        if (!isInsideBoard(row, col)) return false;
+        return getPositionContent(row, col) != PositionContent.BLOCK;
+    }
+
+
+    /**
      * Check if the given position is within the board boundaries.
      */
     private boolean isInsideBoard(int row, int col) {
