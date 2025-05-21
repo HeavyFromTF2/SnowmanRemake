@@ -19,4 +19,3 @@ public class Monster extends MobileElement {
         this.setPosition(newRow, newCol);
     }
 }
-
