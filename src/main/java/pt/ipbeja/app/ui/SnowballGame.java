@@ -4,14 +4,13 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import pt.ipbeja.app.model.BoardModel;
-import pt.ipbeja.app.model.MonsterDirections;
-import pt.ipbeja.app.model.PositionContent;
+import pt.ipbeja.app.model.*;
 
 import java.util.Objects;
+
+import static pt.ipbeja.app.model.SnowballStatus.*;
 
 /**
  * The JavaFX main game window.
@@ -26,20 +25,22 @@ public class SnowballGame extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        this.model = new BoardModel(5, 7);
+        this.model = new BoardModel(10, 10); // tabuleiro aumentado 10x10
         this.grid = new GridPane();
+
+        // Coloca uma bola de neve pequena e neve à frente
+        model.getSnowballs().add(new Snowball(5, 4, SMALL));
+        model.setPositionContent(5, 5, PositionContent.SNOW);
+        model.setPositionContent(5, 6, PositionContent.SNOW);
 
         drawBoard();
 
-        Scene scene = new Scene(grid, 7 * CELL_SIZE, 5 * CELL_SIZE);
+        Scene scene = new Scene(grid, 10 * CELL_SIZE, 10 * CELL_SIZE);
         primaryStage.setTitle("Snowball Game");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    /**
-     * Redraws the full board grid.
-     */
     private void drawBoard() {
         grid.getChildren().clear();
         int rows = model.getRowCount();
@@ -52,13 +53,6 @@ public class SnowballGame extends Application {
         }
     }
 
-    /**
-     * Creates a single cell (ImageView) with image and click handler.
-     *
-     * @param row the row index
-     * @param col the column index
-     * @return the ImageView representing this cell
-     */
     private ImageView createCell(int row, int col) {
         ImageView imageView = new ImageView();
         imageView.setFitWidth(CELL_SIZE);
@@ -66,7 +60,6 @@ public class SnowballGame extends Application {
 
         String imagePath = getImagePath(row, col);
 
-        // Attempts to load the cell image; prints error if image not found
         try {
             Image img = new Image(Objects.requireNonNull(getClass().getResource(imagePath)).toExternalForm(),
                     CELL_SIZE, CELL_SIZE, false, true);
@@ -79,26 +72,37 @@ public class SnowballGame extends Application {
         return imageView;
     }
 
-    /**
-     * Determines the correct image path for a given cell.
-     */
     private String getImagePath(int row, int col) {
+        // Se for a posição do monstro, mostrar a imagem do monstro na direção atual
         if (model.getMonsterRow() == row && model.getMonsterCol() == col) {
             String directionName = currentDirection.name().toLowerCase();
             return "/images/monster_" + directionName + ".png";
         }
+
+        // Se existir uma bola de neve na posição, mostrar a imagem correta
+        Snowball snowball = model.getSnowballAt(row, col);
+        if (snowball != null) {
+            return switch (snowball.getStatus()) {
+                case SMALL -> "/images/small_snowball.png";
+                case MEDIUM -> "/images/medium_snowball.png";
+                case LARGE -> "/images/big_snowball.png";
+                case MEDIUM_SMALL -> "/images/small_medium_snowballs.png";
+                case LARGE_SMALL -> "/images/small_big_snowballs.png";
+                case LARGE_MEDIUM -> "/images/medium_big_snowballs.png";
+                case FULL_SNOWMAN -> "/images/complete_snowman.png";
+            };
+        }
+
+        // Para o restante conteúdo do tabuleiro
         return switch (model.getPositionContent(row, col)) {
             case SNOW -> "/images/snow.png";
             case BLOCK -> "/images/block.png";
-            case SNOWMAN -> "/images/snowman_complete.png";
+            case SNOWMAN -> "/images/complete_snowman.png";  // Usar nome correto da imagem
             case NO_SNOW -> "/images/no_snow.png";
             default -> "/images/no_snow.png";
         };
     }
 
-    /**
-     * Handles clicks on a board cell. Moves the monster if valid.
-     */
     private void handleCellClick(int targetRow, int targetCol) {
         int currentRow = model.getMonsterRow();
         int currentCol = model.getMonsterCol();
