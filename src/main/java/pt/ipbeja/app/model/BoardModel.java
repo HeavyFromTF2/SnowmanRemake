@@ -8,19 +8,26 @@ import java.util.List;
  * The game board model, holding a grid of PositionContent.
  */
 public class BoardModel {
+
+    private final Monster monster;
     private final List<List<PositionContent>> board;
-    private Monster monster;
+    private final List<Snowball> snowballs = new ArrayList<>();
 
     /**
      * Create a board with the given dimensions, all positions NO_SNOW.
      */
     public BoardModel(int rows, int cols) {
-        if (rows <= 0 || cols <= 0) throw new IllegalArgumentException("Rows and cols must be positive");
+        if (rows <= 0 || cols <= 0) throw new IllegalArgumentException("Rows and cols must be positive...");
         board = new ArrayList<>();
+
         for (int r = 0; r < rows; r++) {
             List<PositionContent> row = new ArrayList<>();
             for (int c = 0; c < cols; c++) {
-                row.add(PositionContent.NO_SNOW);
+                if (r == 0 || r == rows - 1 || c == 0 || c == cols - 1) {
+                    row.add(PositionContent.BLOCK); // borda
+                } else {
+                    row.add(PositionContent.NO_SNOW); // interior
+                }
             }
             board.add(row);
         }
@@ -45,12 +52,6 @@ public class BoardModel {
         return this.monster.getCol();
     }
 
-    /**
-     * Get the monster object.
-     */
-    public Monster getMonster() {
-        return this.monster;
-    }
 
     /**
      * Get the PositionContent at a specific location.
@@ -60,23 +61,82 @@ public class BoardModel {
     }
 
     /**
+     * Get the snowballs list
+     */
+
+
+
+    /**
      * Attempt to move the monster in the given direction.
      */
     public void moveMonster(MonsterDirections direction) {
-        int newRow = monster.getRow();
-        int newCol = monster.getCol();
+        int currentRow = monster.getRow();
+        int currentCol = monster.getCol();
 
-        switch (direction) {
-            case UP -> newRow--;
-            case DOWN -> newRow++;
-            case LEFT -> newCol--;
-            case RIGHT -> newCol++;
+        int targetRow = currentRow;
+        int targetCol = currentCol;
+
+        if (direction == MonsterDirections.UP) targetRow--;
+        else if (direction == MonsterDirections.DOWN) targetRow++;
+        else if (direction == MonsterDirections.LEFT) targetCol--;
+        else if (direction == MonsterDirections.RIGHT) targetCol++;
+
+        if (!isInsideBoard(targetRow, targetCol)) return;
+        if (getPositionContent(targetRow, targetCol) == PositionContent.BLOCK) return;
+
+        Snowball snowball = getSnowballAt(targetRow, targetCol);
+        if (snowball != null) {
+            int dirRow = targetRow - currentRow;
+            int dirCol = targetCol - currentCol;
+
+            boolean pushed = tryToPushSnowball(targetRow, targetCol, dirRow, dirCol);
+            if (!pushed) return;
         }
 
-        if (isInsideBoard(newRow, newCol)) {
-            monster.moveTo(newRow, newCol);
-        }
+        monster.moveTo(targetRow, targetCol);
     }
+
+    /**
+     * Attempt to move the snowball in the given direction.
+     */
+    private boolean tryToPushSnowball(int ballRow, int ballCol, int dirRow, int dirCol) {
+        int targetRow = ballRow + dirRow;
+        int targetCol = ballCol + dirCol;
+
+        if (!isInsideBoard(targetRow, targetCol)) return false;
+        if (getPositionContent(targetRow, targetCol) == PositionContent.BLOCK) return false;
+        if (getSnowballAt(targetRow, targetCol) != null) return false;
+
+        Snowball ball = getSnowballAt(ballRow, ballCol);
+        if (ball == null) return false;
+
+        if (getPositionContent(targetRow, targetCol) == PositionContent.SNOW) {
+            ball.growSnowball();
+            board.get(targetRow).set(targetCol, PositionContent.NO_SNOW);
+        }
+
+        ball.setPosition(targetRow, targetCol);
+        return true;
+    }
+
+
+    public Snowball getSnowballAt(int row, int col) {
+        for (Snowball ball : snowballs) {
+            if (ball.getRow() == row && ball.getCol() == col) return ball;
+        }
+        return null;
+    }
+
+
+    public List<Snowball> getSnowballs() {
+        return this.snowballs;
+    }
+
+
+    public void setPositionContent(int row, int col, PositionContent content) {
+        board.get(row).set(col, content);
+    }
+
 
     /**
      * Check if the monster can move to a given position (must be inside board and not a BLOCK).

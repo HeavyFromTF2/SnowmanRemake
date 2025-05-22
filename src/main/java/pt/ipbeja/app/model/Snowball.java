@@ -41,7 +41,7 @@ public class Snowball extends MobileElement {
      * Grows the snowball if it's SMALL or MEDIUM and it's moved over SNOW.
      * Does nothing if it's already LARGE or a combined type.
      */
-    public void grow() {
+    public void growSnowball() {
         switch (this.status) {
             case SMALL:
                 this.status = SnowballStatus.MEDIUM;
