@@ -26,12 +26,24 @@ public class SnowballGame extends Application {
     @Override
     public void start(Stage primaryStage) {
         this.model = new BoardModel(10, 10); // tabuleiro aumentado 10x10
+
+        // Sempre que o modelo muda (ex: reset), redesenha o tabuleiro
+        this.model.setOnBoardChanged(this::drawBoard);
+
         this.grid = new GridPane();
 
-        // Coloca uma bola de neve pequena e neve à frente
-        model.getSnowballs().add(new Snowball(5, 4, SMALL));
-        model.setPositionContent(5, 5, PositionContent.SNOW);
-        model.setPositionContent(5, 6, PositionContent.SNOW);
+        // Neve para fazer as bolas crescerem
+        model.setPositionContent(7, 4, PositionContent.SNOW);
+        model.setPositionContent(7, 5, PositionContent.SNOW);
+        model.setPositionContent(7, 6, PositionContent.SNOW);
+        model.setPositionContent(7, 7, PositionContent.SNOW);
+        model.setPositionContent(7, 8, PositionContent.SNOW);
+
+
+        // Bolas em sequência
+        model.getSnowballs().add(new Snowball(5, 3, SnowballStatus.SMALL));
+        model.getSnowballs().add(new Snowball(5, 4, SnowballStatus.MEDIUM));
+        model.getSnowballs().add(new Snowball(5, 6, SnowballStatus.LARGE));
 
         drawBoard();
 
@@ -65,7 +77,7 @@ public class SnowballGame extends Application {
                     CELL_SIZE, CELL_SIZE, false, true);
             imageView.setImage(img);
         } catch (NullPointerException e) {
-            System.err.println("Erro: imagem não encontrada -> " + imagePath);
+            System.err.println("Error: image not found -> " + imagePath);
         }
 
         imageView.setOnMouseClicked(event -> handleCellClick(row, col));
