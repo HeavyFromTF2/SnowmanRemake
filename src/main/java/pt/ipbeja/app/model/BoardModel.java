@@ -193,13 +193,52 @@ public class BoardModel {
     }
 
 
+    /**
+     * Check if the level is completed or if it becomes impossible to complete.
+     */
     private void checkLevelCompleted() {
+        boolean hasFullSnowman = false;
+        int smallCount = 0;
+        int largeCount = 0;
+
         for (Snowball s : snowballs) {
-            if (s.getStatus() == SnowballStatus.FULL_SNOWMAN) {
-                showLevelCompletedDialog();
-                break;
+            switch (s.getStatus()) {
+                case FULL_SNOWMAN -> hasFullSnowman = true;
+                case SMALL -> smallCount++;
+                case MEDIUM_SMALL -> {
+                    smallCount++;
+                }
+                case LARGE_SMALL -> {
+                    smallCount++;
+                    // largeCount++;
+                }
+                case LARGE -> largeCount++;
             }
         }
+        // If the snowman is full, end game
+        if (hasFullSnowman) {
+            showLevelCompletedDialog();
+        }
+        // If no small balls remain or there are 2 or more large balls, game is impossible
+        else if (smallCount == 0 || largeCount >= 2) {
+            showUnsolvableDialog();
+        }
+    }
+
+    /**
+     * Show a warning dialog if the game can no longer be completed,
+     * then reset the game after user clicks OK.
+     */
+    private void showUnsolvableDialog() {
+        javafx.application.Platform.runLater(() -> {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+            alert.setTitle("Game Over");
+            alert.setHeaderText(null);
+            alert.setContentText("This game can no longer be completed.\nResetting the board...");
+
+            alert.setOnHidden(e -> resetGame());
+            alert.show();
+        });
     }
 
     private void showLevelCompletedDialog() {

@@ -7,10 +7,13 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import pt.ipbeja.app.model.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 
 import java.util.Objects;
 
-import static pt.ipbeja.app.model.SnowballStatus.*;
 
 /**
  * The JavaFX main game window.
@@ -23,34 +26,49 @@ public class SnowballGame extends Application {
     private GridPane grid;
     private MonsterDirections currentDirection = MonsterDirections.DOWN;
 
+    private TextArea moveLog;
+    private Label moveCounterLabel;
+    private int moveCount = 0;
+
     @Override
     public void start(Stage primaryStage) {
-        this.model = new BoardModel(10, 10); // tabuleiro aumentado 10x10
-
-        // Sempre que o modelo muda (ex: reset), redesenha o tabuleiro
+        this.model = new BoardModel(10, 10);
         this.model.setOnBoardChanged(this::drawBoard);
-
         this.grid = new GridPane();
 
-        // Neve para fazer as bolas crescerem
         model.setPositionContent(7, 4, PositionContent.SNOW);
         model.setPositionContent(7, 5, PositionContent.SNOW);
         model.setPositionContent(7, 6, PositionContent.SNOW);
         model.setPositionContent(7, 7, PositionContent.SNOW);
         model.setPositionContent(7, 8, PositionContent.SNOW);
 
-
-        // Bolas em sequência
         model.getSnowballs().add(new Snowball(5, 3, SnowballStatus.SMALL));
         model.getSnowballs().add(new Snowball(5, 4, SnowballStatus.MEDIUM));
         model.getSnowballs().add(new Snowball(5, 6, SnowballStatus.LARGE));
 
         drawBoard();
 
-        Scene scene = new Scene(grid, 10 * CELL_SIZE, 10 * CELL_SIZE);
+        BorderPane mainLayout = createMainLayout();
+
+        Scene scene = new Scene(mainLayout, 10 * CELL_SIZE, 10 * CELL_SIZE + 100);
         primaryStage.setTitle("Snowball Game");
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    private BorderPane createMainLayout() {
+        moveLog = new TextArea();
+        moveLog.setEditable(false);
+        moveLog.setPrefHeight(100);
+
+        moveCounterLabel = new Label("Movimentos: 0");
+
+        VBox bottomBox = new VBox(moveCounterLabel, moveLog);
+        BorderPane mainLayout = new BorderPane();
+        mainLayout.setCenter(grid);
+        mainLayout.setBottom(bottomBox);
+
+        return mainLayout;
     }
 
     private void drawBoard() {
@@ -131,6 +149,8 @@ public class SnowballGame extends Application {
         if (dCol == 1) currentDirection = MonsterDirections.RIGHT;
 
         model.moveMonster(currentDirection);
+        moveCount++;  // conta o movimento
+        moveCounterLabel.setText("Movements: " + moveCount);
         drawBoard();
     }
 
