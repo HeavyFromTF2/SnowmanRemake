@@ -1,7 +1,14 @@
 package pt.ipbeja.app.model;
 
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -15,6 +22,9 @@ public class BoardModel {
 
     // Callback para avisar a interface gráfica que o modelo mudou
     private Runnable onBoardChanged;
+    // Callback para ver se o jogo ja acabou
+    private Runnable onGameCompleted;
+
 
     /**
      * Define o que fazer quando o modelo for alterado (ex: redesenhar o tabuleiro).
@@ -249,6 +259,10 @@ public class BoardModel {
             alert.setContentText("Good job, you did a full snowman");
 
             alert.setOnHidden(e -> resetGame());
+            alert.setOnHidden(e -> {
+                if (onGameCompleted != null) onGameCompleted.run();
+                resetGame();
+            });
             alert.show();
         });
     }
@@ -300,6 +314,9 @@ public class BoardModel {
         board.get(row).set(col, content);
     }
 
+    public void setOnGameCompleted(Runnable callback) {
+        this.onGameCompleted = callback;
+    }
 
     /**
      * Check if the monster can move to a given position (must be inside board and not a BLOCK).
@@ -316,6 +333,73 @@ public class BoardModel {
     private boolean isInsideBoard(int row, int col) {
         return row >= 0 && row < board.size() && col >= 0 && col < board.get(0).size();
     }
+
+
+
+    public void saveGameToFile(String moveLog, int moveCount) {
+        String folderName = "snowman_files";
+
+        String filename = folderName + "/" + generateFilename();  // caminho completo
+
+        List<String> lines = new ArrayList<>();
+        lines.add("MAP:");
+        lines.addAll(getMapLines());
+        lines.add("MOVEMENT LOG:");
+        lines.addAll(Arrays.asList(moveLog.split("\n")));
+        lines.add("TOTAL MOVEMENTS: " + moveCount);
+        lines.add("SNOWMAN POSITION: " + findSnowmanPosition());
+
+        writeLinesToFile(filename, lines);
+    }
+
+    private String generateFilename() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        return "snowman" + now.format(formatter) + ".txt";
+    }
+
+    private List<String> getMapLines() {
+        List<String> map = new ArrayList<>();
+        for (int row = 0; row < board.size(); row++) {
+            StringBuilder line = new StringBuilder();
+            for (int col = 0; col < board.get(0).size(); col++) {
+                PositionContent c = getPositionContent(row, col);
+                char symbol = switch (c) {
+                    case BLOCK -> '#';
+                    case SNOW -> '*';
+                    case SNOWMAN -> '⛄';
+                    case NO_SNOW -> '.';
+                };
+                line.append(symbol).append(' ');
+            }
+            map.add(line.toString());
+        }
+        return map;
+    }
+
+    private String findSnowmanPosition() {
+        for (int row = 0; row < board.size(); row++) {
+            for (int col = 0; col < board.get(0).size(); col++) {
+                if (getPositionContent(row, col) == PositionContent.SNOWMAN) {
+                    return "(" + row + "," + col + ")";
+                }
+            }
+        }
+        return "(not found)";
+    }
+
+    private void writeLinesToFile(String filename, List<String> lines) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+            for (String line : lines) {
+                writer.write(line);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
 
     public int getRowCount() {

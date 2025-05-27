@@ -46,6 +46,11 @@ public class SnowballGame extends Application {
         model.getSnowballs().add(new Snowball(5, 4, SnowballStatus.MEDIUM));
         model.getSnowballs().add(new Snowball(5, 6, SnowballStatus.LARGE));
 
+
+        model.setOnGameCompleted(() -> {
+            model.saveGameToFile(moveLog.getText(), moveCount);
+        });
+
         drawBoard();
 
         BorderPane mainLayout = createMainLayout();
@@ -61,7 +66,7 @@ public class SnowballGame extends Application {
         moveLog.setEditable(false);
         moveLog.setPrefHeight(100);
 
-        moveCounterLabel = new Label("Movimentos: 0");
+        moveCounterLabel = new Label("Movements: 0");
 
         VBox bottomBox = new VBox(moveCounterLabel, moveLog);
         BorderPane mainLayout = new BorderPane();
@@ -153,6 +158,7 @@ public class SnowballGame extends Application {
         moveCounterLabel.setText("Movements: " + moveCount);
         drawBoard();
     }
+
 
     public static void main(String[] args) {
         launch(args);
