@@ -24,10 +24,13 @@ public class SnowballGame extends Application {
 
     private BoardModel model;
     private GridPane grid;
+
     private MonsterDirections currentDirection = MonsterDirections.DOWN;
 
     private TextArea moveLog;
     private Label moveCounterLabel;
+    private Label monsterPositionLabel;
+
     private int moveCount = 0;
 
     @Override
@@ -40,15 +43,19 @@ public class SnowballGame extends Application {
         model.setPositionContent(7, 5, PositionContent.SNOW);
         model.setPositionContent(7, 6, PositionContent.SNOW);
         model.setPositionContent(7, 7, PositionContent.SNOW);
-        model.setPositionContent(7, 8, PositionContent.SNOW);
 
         model.getSnowballs().add(new Snowball(5, 3, SnowballStatus.SMALL));
-        model.getSnowballs().add(new Snowball(5, 4, SnowballStatus.MEDIUM));
-        model.getSnowballs().add(new Snowball(5, 6, SnowballStatus.LARGE));
+        model.getSnowballs().add(new Snowball(6, 5, SnowballStatus.MEDIUM));
+        model.getSnowballs().add(new Snowball(6, 6, SnowballStatus.LARGE));
 
 
         model.setOnGameCompleted(() -> {
-            model.saveGameToFile(moveLog.getText(), moveCount);
+            model.saveMonsterPositionsToFile();
+        });
+
+        model.setOnGameReset(() -> {
+            moveCount = 0;
+            moveCounterLabel.setText("Movements: 0");
         });
 
         drawBoard();
@@ -68,7 +75,14 @@ public class SnowballGame extends Application {
 
         moveCounterLabel = new Label("Movements: 0");
 
-        VBox bottomBox = new VBox(moveCounterLabel, moveLog);
+        // Posição inicial do monstro
+        int monsterRow = model.getMonsterRow();
+        int monsterCol = model.getMonsterCol();
+        char colLetter = (char) ('A' + monsterCol);
+        monsterPositionLabel = new Label("Posição do Monstro: (" + (monsterRow + 1) + ", " + colLetter + ")");
+
+        VBox bottomBox = new VBox(moveCounterLabel, monsterPositionLabel, moveLog);
+
         BorderPane mainLayout = new BorderPane();
         mainLayout.setCenter(grid);
         mainLayout.setBottom(bottomBox);
@@ -156,6 +170,10 @@ public class SnowballGame extends Application {
         model.moveMonster(currentDirection);
         moveCount++;  // conta o movimento
         moveCounterLabel.setText("Movements: " + moveCount);
+
+        char colLetter = (char) ('A' + model.getMonsterCol());
+        monsterPositionLabel.setText("Posição do Monstro: (" + (model.getMonsterRow() + 1) + ", " + colLetter + ")");
+
         drawBoard();
     }
 
