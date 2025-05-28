@@ -1,0 +1,6 @@
+B B B B B B B
+B s n n 1 s B
+B n B s B n B
+B 2 s n s 3 B
+B s n B n s B
+B B B B B B B

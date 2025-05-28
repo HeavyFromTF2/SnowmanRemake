@@ -12,6 +12,9 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Objects;
 
 
@@ -35,34 +38,16 @@ public class SnowballGame extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        this.model = new BoardModel(10, 10);
+        this.model = new BoardModel(10, 10); // Adjust size to match level
         this.model.setOnBoardChanged(this::drawBoard);
         this.grid = new GridPane();
 
-        model.setPositionContent(7, 4, PositionContent.SNOW);
-        model.setPositionContent(7, 5, PositionContent.SNOW);
-        model.setPositionContent(7, 6, PositionContent.SNOW);
-        model.setPositionContent(7, 7, PositionContent.SNOW);
+        loadLevelFromFile();
 
-        model.getSnowballs().add(new Snowball(5, 3, SnowballStatus.SMALL));
-        model.getSnowballs().add(new Snowball(6, 5, SnowballStatus.MEDIUM));
-        model.getSnowballs().add(new Snowball(6, 6, SnowballStatus.LARGE));
-
-
-        model.setOnGameCompleted(() -> {
-            model.saveMonsterPositionsToFile();
-        });
-
-        model.setOnGameReset(() -> {
-            moveCount = 0;
-            moveCounterLabel.setText("Movements: 0");
-        });
-
+        BorderPane mainLayout = createMainLayout(); // 🔧 FIX: use this to initialize UI components
         drawBoard();
 
-        BorderPane mainLayout = createMainLayout();
-
-        Scene scene = new Scene(mainLayout, 10 * CELL_SIZE, 10 * CELL_SIZE + 100);
+        Scene scene = new Scene(mainLayout, 10 * CELL_SIZE, 10 * CELL_SIZE);
         primaryStage.setTitle("Snowball Game");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -99,6 +84,26 @@ public class SnowballGame extends Application {
             for (int col = 0; col < cols; col++) {
                 grid.add(createCell(row, col), col, row);
             }
+        }
+    }
+
+    private void loadLevelFromFile() {
+        try (BufferedReader br = new BufferedReader(new FileReader("C:/Users/rafae/IdeaProjects/AGoodSnowman/src/main/resources/levels/nivel2.txt"))) {
+            for (int row = 0; br.ready(); row++) {
+                String[] tokens = br.readLine().trim().split("\\s+");
+                for (int col = 0; col < tokens.length; col++) {
+                    switch (tokens[col]) {
+                        case "*" -> model.setPositionContent(row, col, PositionContent.SNOW);
+                        case "s" -> model.getSnowballs().add(new Snowball(row, col, SnowballStatus.SMALL));
+                        case "m" -> model.getSnowballs().add(new Snowball(row, col, SnowballStatus.MEDIUM));
+                        case "b" -> model.getSnowballs().add(new Snowball(row, col, SnowballStatus.LARGE));
+                        case "#" -> model.setPositionContent(row, col, PositionContent.BLOCK);
+                        case "." -> model.setPositionContent(row, col, PositionContent.NO_SNOW);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
