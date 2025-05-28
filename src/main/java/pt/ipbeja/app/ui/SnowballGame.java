@@ -44,9 +44,10 @@ public class SnowballGame extends Application {
 
         loadLevelFromFile();
 
+        BorderPane mainLayout = createMainLayout(); // 🔧 FIX: use this to initialize UI components
         drawBoard();
 
-        Scene scene = new Scene(grid, 10 * CELL_SIZE, 10 * CELL_SIZE);
+        Scene scene = new Scene(mainLayout, 10 * CELL_SIZE, 10 * CELL_SIZE);
         primaryStage.setTitle("Snowball Game");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -87,16 +88,17 @@ public class SnowballGame extends Application {
     }
 
     private void loadLevelFromFile() {
-        try (BufferedReader br = new BufferedReader(new FileReader("/levels/nivel2.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("C:/Users/rafae/IdeaProjects/AGoodSnowman/src/main/resources/levels/nivel2.txt"))) {
             for (int row = 0; br.ready(); row++) {
                 String[] tokens = br.readLine().trim().split("\\s+");
                 for (int col = 0; col < tokens.length; col++) {
                     switch (tokens[col]) {
-                        case "s" -> model.setPositionContent(row, col, PositionContent.SNOW);
-                        case "1" -> model.getSnowballs().add(new Snowball(row, col, SnowballStatus.SMALL));
-                        case "2" -> model.getSnowballs().add(new Snowball(row, col, SnowballStatus.MEDIUM));
-                        case "3" -> model.getSnowballs().add(new Snowball(row, col, SnowballStatus.LARGE));
-                        case "B" -> model.setPositionContent(row, col, PositionContent.BLOCK);
+                        case "*" -> model.setPositionContent(row, col, PositionContent.SNOW);
+                        case "s" -> model.getSnowballs().add(new Snowball(row, col, SnowballStatus.SMALL));
+                        case "m" -> model.getSnowballs().add(new Snowball(row, col, SnowballStatus.MEDIUM));
+                        case "b" -> model.getSnowballs().add(new Snowball(row, col, SnowballStatus.LARGE));
+                        case "#" -> model.setPositionContent(row, col, PositionContent.BLOCK);
+                        case "." -> model.setPositionContent(row, col, PositionContent.NO_SNOW);
                     }
                 }
             }
