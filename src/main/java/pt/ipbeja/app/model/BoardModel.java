@@ -19,11 +19,15 @@ public class BoardModel {
     private final Monster monster;
     private final List<List<PositionContent>> board;
     private final List<Snowball> snowballs = new ArrayList<>();
+    private final List<String> monsterPositions = new ArrayList<>();
 
     // Callback para avisar a interface gráfica que o modelo mudou
     private Runnable onBoardChanged;
     // Callback para ver se o jogo ja acabou
     private Runnable onGameCompleted;
+    // Callback para resetar o contador de movimentos (só da UI)
+    private Runnable onGameReset;
+
 
 
     /**
@@ -32,6 +36,13 @@ public class BoardModel {
      */
     public void setOnBoardChanged(Runnable callback) {
         this.onBoardChanged = callback;
+    }
+
+    /**
+     * Define um callback que é chamado quando o jogo resetar
+     */
+    public void setOnGameReset(Runnable callback) {
+        this.onGameReset = callback;
     }
 
     /**
@@ -121,6 +132,7 @@ public class BoardModel {
             // Movimento sem bola — pode andar normalmente
             monster.moveTo(targetRow, targetCol);
         }
+        addMonsterPositionToLog();
         checkLevelCompleted();
     }
 
@@ -295,6 +307,12 @@ public class BoardModel {
 
         // Notifica a UI para redesenhar o tabuleiro
         if (onBoardChanged != null) onBoardChanged.run();
+        // Notifica a UI do reset dos movimentos do monstro
+        if (onGameReset != null) onGameReset.run();
+
+
+        // Reset do contador
+        monsterPositions.clear();
     }
 
     public Snowball getSnowballAt(int row, int col) {
@@ -336,22 +354,6 @@ public class BoardModel {
 
 
 
-    public void saveGameToFile(String moveLog, int moveCount) {
-        String folderName = "snowman_files";
-
-        String filename = folderName + "/" + generateFilename();  // caminho completo
-
-        List<String> lines = new ArrayList<>();
-        lines.add("MAP:");
-        lines.addAll(getMapLines());
-        lines.add("MOVEMENT LOG:");
-        lines.addAll(Arrays.asList(moveLog.split("\n")));
-        lines.add("TOTAL MOVEMENTS: " + moveCount);
-        lines.add("SNOWMAN POSITION: " + findSnowmanPosition());
-
-        writeLinesToFile(filename, lines);
-    }
-
     private String generateFilename() {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
@@ -381,7 +383,8 @@ public class BoardModel {
         for (int row = 0; row < board.size(); row++) {
             for (int col = 0; col < board.get(0).size(); col++) {
                 if (getPositionContent(row, col) == PositionContent.SNOWMAN) {
-                    return "(" + row + "," + col + ")";
+                    char columnLetter = (char) ('A' + col);
+                    return "(" + row + "," + columnLetter + ")";
                 }
             }
         }
@@ -397,6 +400,29 @@ public class BoardModel {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void addMonsterPositionToLog() {
+        // Regista a posição atual do monstro no formato (linha, coluna)
+        char columnLetter = (char) ('A' + monster.getCol());
+        String pos = "(" + monster.getRow() + "," + columnLetter + ")";
+        monsterPositions.add(pos);
+    }
+
+    public void saveMonsterPositionsToFile() {
+        String folderName = "snowman_files";
+        String filename = folderName + "/" + generateFilename();
+
+        List<String> lines = new ArrayList<>();
+        lines.add("MAP:");
+        lines.addAll(getMapLines());
+
+        lines.add("MOVEMENT LOG OF MONSTER:");
+        lines.add(String.join(" ", monsterPositions));  // todos na mesma linha
+        lines.add("TOTAL MOVEMENTS: " + monsterPositions.size());
+        lines.add("SNOWMAN POSITION: " + findSnowmanPosition());
+
+        writeLinesToFile(filename, lines);
     }
 
 
