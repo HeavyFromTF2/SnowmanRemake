@@ -1,14 +1,11 @@
 package pt.ipbeja.app.model;
 
-
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -16,7 +13,7 @@ import java.util.List;
  */
 public class BoardModel {
 
-    private final Monster monster;
+    public Monster monster;
     private final List<List<PositionContent>> board;
     private final List<Snowball> snowballs = new ArrayList<>();
     private final List<String> monsterPositions = new ArrayList<>();
@@ -64,11 +61,6 @@ public class BoardModel {
             }
             board.add(row);
         }
-
-        // Place the monster in the center of the board by default
-        int startRow = rows / 2;
-        int startCol = cols / 2;
-        this.monster = new Monster(startRow, startCol);
     }
 
     /**
@@ -273,6 +265,7 @@ public class BoardModel {
             alert.setOnHidden(e -> resetGame());
             alert.setOnHidden(e -> {
                 if (onGameCompleted != null) onGameCompleted.run();
+                saveMonsterPositionsToFile();
                 resetGame();
             });
             alert.show();
@@ -435,6 +428,11 @@ public class BoardModel {
     public int getColCount() {
         return board.get(0).size(); // número de colunas (tamanho da primeira linha)
     }
+
+    public void setMonster(Monster monster) { this.monster = monster; }
+
+    public Runnable getOnBoardChanged() { return this.onBoardChanged; }
+
 }
 
 

@@ -13,8 +13,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Objects;
 
 
@@ -42,15 +41,16 @@ public class SnowballGame extends Application {
         this.model.setOnBoardChanged(this::drawBoard);
         this.grid = new GridPane();
 
-        loadLevelFromFile();
+        loadLevelFromFile("nivel2");
 
-        BorderPane mainLayout = createMainLayout(); // 🔧 FIX: use this to initialize UI components
+        BorderPane mainLayout = createMainLayout();
         drawBoard();
 
-        Scene scene = new Scene(mainLayout, 10 * CELL_SIZE, 10 * CELL_SIZE);
+        Scene scene = new Scene(mainLayout, 10 * CELL_SIZE, 10 * CELL_SIZE + 40);
         primaryStage.setTitle("Snowball Game");
         primaryStage.setScene(scene);
         primaryStage.show();
+
     }
 
     private BorderPane createMainLayout() {
@@ -87,8 +87,12 @@ public class SnowballGame extends Application {
         }
     }
 
-    private void loadLevelFromFile() {
-        try (BufferedReader br = new BufferedReader(new FileReader("C:/Users/rafae/IdeaProjects/AGoodSnowman/src/main/resources/levels/nivel2.txt"))) {
+    // PICKAXE
+    private void loadLevelFromFile(String levelName) {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(Objects.requireNonNull(getClass().getResourceAsStream("/levels/nivel2.txt"))))) {
+                //Para quando for dinamico, meter no metodo(String levelName): new InputStreamReader(getClass().getResourceAsStream("/levels/" + levelName + ".txt")))) {
+
             for (int row = 0; br.ready(); row++) {
                 String[] tokens = br.readLine().trim().split("\\s+");
                 for (int col = 0; col < tokens.length; col++) {
@@ -99,13 +103,18 @@ public class SnowballGame extends Application {
                         case "b" -> model.getSnowballs().add(new Snowball(row, col, SnowballStatus.LARGE));
                         case "#" -> model.setPositionContent(row, col, PositionContent.BLOCK);
                         case "." -> model.setPositionContent(row, col, PositionContent.NO_SNOW);
+                        case "M" -> model.setMonster(new Monster(row, col));
                     }
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            if (model.getOnBoardChanged() != null) model.getOnBoardChanged().run();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao carregar nível: " + e.getMessage());
         }
     }
+
 
     private ImageView createCell(int row, int col) {
         ImageView imageView = new ImageView();
