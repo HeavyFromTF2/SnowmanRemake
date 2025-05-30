@@ -13,6 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import pt.ipbeja.app.model.interfaces.View;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -22,7 +23,7 @@ import java.util.Objects;
 /**
  * The JavaFX main game window.
  */
-public class SnowballGame extends Application {
+public class SnowballGame extends Application implements View {
 
     private static final int CELL_SIZE = 60;
 
@@ -40,7 +41,7 @@ public class SnowballGame extends Application {
     @Override
     public void start(Stage primaryStage) {
         this.model = new BoardModel(10, 10); // Adjust size to match level
-        this.model.setOnBoardChanged(this::drawBoard);
+        this.model.setView(this);
         this.grid = new GridPane();
 
         loadLevelFromFile("nivel2");
@@ -104,6 +105,23 @@ public class SnowballGame extends Application {
         }
     }
 
+    @Override
+    public void updateBoard() {
+        drawBoard();
+    }
+
+    @Override
+    public void resetUI() {
+        moveCount = 0;
+        moveCounterLabel.setText("Movements: 0");
+        moveLog.clear();
+    }
+
+    @Override
+    public void gameCompleted() {
+        System.out.println("Game completed!"); // opcional
+    }
+
 
     private Label createHeaderLabel(String text) {
         Label label = new Label(text);
@@ -136,7 +154,7 @@ public class SnowballGame extends Application {
                 }
             }
 
-            if (model.getOnBoardChanged() != null) model.getOnBoardChanged().run();
+            //if (model.getOnBoardChanged() != null) model.getOnBoardChanged().run();
 
         } catch (Exception e) {
             System.err.println("Error loading level: " + e.getMessage());

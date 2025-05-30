@@ -1,5 +1,7 @@
 package pt.ipbeja.app.model;
 
+import pt.ipbeja.app.model.interfaces.View;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,34 +14,16 @@ import java.util.List;
  * The game board model, holding a grid of PositionContent.
  */
 public class BoardModel {
+    private View view;
 
     public Monster monster;
     private final List<List<PositionContent>> board;
     private final List<Snowball> snowballs = new ArrayList<>();
     private final List<String> monsterPositions = new ArrayList<>();
 
-    // Callback para avisar a interface gráfica que o modelo mudou
-    private Runnable onBoardChanged;
-    // Callback para ver se o jogo ja acabou
-    private Runnable onGameCompleted;
-    // Callback para resetar o contador de movimentos (só da UI)
-    private Runnable onGameReset;
 
-
-
-    /**
-     * Define o que fazer quando o modelo for alterado (ex: redesenhar o tabuleiro).
-     * A UI chama isto para receber notificações do modelo.
-     */
-    public void setOnBoardChanged(Runnable callback) {
-        this.onBoardChanged = callback;
-    }
-
-    /**
-     * Define um callback que é chamado quando o jogo resetar
-     */
-    public void setOnGameReset(Runnable callback) {
-        this.onGameReset = callback;
+    public void setView(View view) {
+        this.view = view;
     }
 
     /**
@@ -264,7 +248,7 @@ public class BoardModel {
 
             alert.setOnHidden(e -> resetGame());
             alert.setOnHidden(e -> {
-                if (onGameCompleted != null) onGameCompleted.run();
+                if (view != null) view.gameCompleted();
                 saveMonsterPositionsToFile();
                 resetGame();
             });
@@ -299,9 +283,9 @@ public class BoardModel {
         monster.setPosition(board.size() / 2, board.get(0).size() / 2);
 
         // Notifica a UI para redesenhar o tabuleiro
-        if (onBoardChanged != null) onBoardChanged.run();
+        if (view != null) view.updateBoard();
         // Notifica a UI do reset dos movimentos do monstro
-        if (onGameReset != null) onGameReset.run();
+        if (view != null) view.resetUI();
 
 
         // Reset do contador
@@ -323,10 +307,6 @@ public class BoardModel {
 
     public void setPositionContent(int row, int col, PositionContent content) {
         board.get(row).set(col, content);
-    }
-
-    public void setOnGameCompleted(Runnable callback) {
-        this.onGameCompleted = callback;
     }
 
     /**
@@ -413,7 +393,7 @@ public class BoardModel {
         lines.add("MOVEMENT LOG OF MONSTER:");
         lines.add(String.join(" ", monsterPositions));  // todos na mesma linha
         lines.add("TOTAL MOVEMENTS: " + monsterPositions.size());
-        lines.add("SNOWMAN POSITION: " + findSnowmanPosition());
+        lines.add("SNOWMAN POSITION: " + findSnowmanPosition());            //TODO acho que as coordenadas tao fdds
 
         writeLinesToFile(filename, lines);
     }
@@ -430,8 +410,6 @@ public class BoardModel {
     }
 
     public void setMonster(Monster monster) { this.monster = monster; }
-
-    public Runnable getOnBoardChanged() { return this.onBoardChanged; }
 
 }
 
