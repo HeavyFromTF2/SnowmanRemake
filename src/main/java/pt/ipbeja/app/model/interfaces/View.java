@@ -1,8 +1,8 @@
 package pt.ipbeja.app.model.interfaces;
 
-// TODO ISTO TEM QUE SER COM VIEW, PARA SER MEDIANTE ENTRE O MODEL E A UI
+// Em principio a view ta bem feita. Pode ter algo mal tho
 public interface View {
     void updateBoard();
-    void resetUI();  // opcional: por ex. para contador de movimentos
+    void resetUI();  // opcional: por ex. para contador de movimentos lol
     void gameCompleted();  // opcional: se quiseres sinalizar a vitória
 }
