@@ -1,6 +1,8 @@
 package pt.ipbeja.app.ui;
 
 import javafx.application.Application;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -64,7 +66,7 @@ public class SnowballGame extends Application {
         int monsterRow = model.getMonsterRow();
         int monsterCol = model.getMonsterCol();
         char colLetter = (char) ('A' + monsterCol);
-        monsterPositionLabel = new Label("Posição do Monstro: (" + (monsterRow + 1) + ", " + colLetter + ")");
+        monsterPositionLabel = new Label("Monster position: (" + (monsterRow + 1) + ", " + colLetter + ")");
 
         VBox bottomBox = new VBox(moveCounterLabel, monsterPositionLabel, moveLog);
 
@@ -77,15 +79,41 @@ public class SnowballGame extends Application {
 
     private void drawBoard() {
         grid.getChildren().clear();
+
         int rows = model.getRowCount();
         int cols = model.getColCount();
 
+        // Adiciona letras das colunas (topo) e números das linhas (esquerda)
+        for (int i = 0; i < Math.max(rows, cols); i++) {
+            if (i < cols) {
+                char colLetter = (char) ('A' + i);
+                Label colLabel = createHeaderLabel(String.valueOf(colLetter));
+                grid.add(colLabel, i + 1, 0);
+            }
+            if (i < rows) {
+                Label rowLabel = createHeaderLabel(String.valueOf(i + 1));
+                grid.add(rowLabel, 0, i + 1);
+            }
+        }
+
+        // Adiciona as células do tabuleiro
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
-                grid.add(createCell(row, col), col, row);
+                grid.add(createCell(row, col), col + 1, row + 1);
             }
         }
     }
+
+
+    private Label createHeaderLabel(String text) {
+        Label label = new Label(text);
+        label.setMinSize(40, 40);
+        label.setAlignment(Pos.CENTER);
+        label.setStyle("-fx-font-weight: bold;");
+        return label;
+    }
+
+
 
     // PICKAXE
     private void loadLevelFromFile(String levelName) {
@@ -111,7 +139,7 @@ public class SnowballGame extends Application {
             if (model.getOnBoardChanged() != null) model.getOnBoardChanged().run();
 
         } catch (Exception e) {
-            System.err.println("Erro ao carregar nível: " + e.getMessage());
+            System.err.println("Error loading level: " + e.getMessage());
         }
     }
 
@@ -173,20 +201,33 @@ public class SnowballGame extends Application {
         int dRow = targetRow - currentRow;
         int dCol = targetCol - currentCol;
 
+        // Verifica se o movimento é válido (apenas uma célula na horizontal ou vertical)
         if (Math.abs(dRow) + Math.abs(dCol) != 1) return;
         if (!model.canMoveTo(targetRow, targetCol)) return;
 
+        // Salva a posição anterior em notação (linha, letra)
+        char oldColLetter = (char) ('A' + currentCol);
+        String oldPosition = "(" + (currentRow + 1) + ", " + oldColLetter + ")";
+
+        // Determina a direção
         if (dRow == -1) currentDirection = MonsterDirections.UP;
         if (dRow == 1) currentDirection = MonsterDirections.DOWN;
         if (dCol == -1) currentDirection = MonsterDirections.LEFT;
         if (dCol == 1) currentDirection = MonsterDirections.RIGHT;
 
+        // Move o monstro
         model.moveMonster(currentDirection);
-        moveCount++;  // conta o movimento
+        moveCount++;  // Conta o movimento
         moveCounterLabel.setText("Movements: " + moveCount);
 
-        char colLetter = (char) ('A' + model.getMonsterCol());
-        monsterPositionLabel.setText("Posição do Monstro: (" + (model.getMonsterRow() + 1) + ", " + colLetter + ")");
+        // Obtém nova posição
+        int newRow = model.getMonsterRow();
+        int newCol = model.getMonsterCol();
+        char newColLetter = (char) ('A' + newCol);
+        String newPosition = "(" + (newRow + 1) + ", " + newColLetter + ")";
+
+        // Atualiza label para mostrar o movimento feito
+        monsterPositionLabel.setText("Movimento do Monstro: " + oldPosition + " -> " + newPosition);
 
         drawBoard();
     }
