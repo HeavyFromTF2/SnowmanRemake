@@ -191,6 +191,7 @@ public class BoardModel {
         target.setStatus(newStatus);
         snowballs.remove(moving);
 
+        System.out.println(newStatus);
         if (newStatus == SnowballStatus.FULL_SNOWMAN) {
             board.get(row).set(col, PositionContent.SNOWMAN);
         }
@@ -235,37 +236,16 @@ public class BoardModel {
      * then reset the game after user clicks OK.
      */
     private void showUnsolvableDialog() {
-        javafx.application.Platform.runLater(() -> {
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
-            alert.setTitle("Game Over");
-            alert.setHeaderText(null);
-            alert.setContentText("This game can no longer be completed.\nResetting the board...");
-
-            alert.setOnHidden(e -> {
-                if (view != null) view.returnToMenu();
-            });
-            alert.show();
-        });
+        if (view != null) {
+            view.showUnsolvableDialog();
+        }
     }
-
 
     private void showLevelCompletedDialog() {
-        javafx.application.Platform.runLater(() -> {
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-            alert.setTitle("You did it");
-            alert.setHeaderText(null);
-            alert.setContentText("Good job, you did a full snowman");
-
-            alert.setOnHidden(e -> resetGame());
-            alert.setOnHidden(e -> {
-                if (view != null) view.gameCompleted();
-                saveMonsterPositionsToFile();
-                resetGame();
-            });
-            alert.show();
-        });
+        if (view != null) {
+            view.showLevelCompletedDialog();
+        }
     }
-
 
     public void resetGame() {
         snowballs.clear();

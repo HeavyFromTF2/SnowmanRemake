@@ -7,4 +7,7 @@ public interface View {
     void gameCompleted();  // opcional: se quiseres sinalizar a vitória
 
     void returnToMenu();  // para quando o jogo resetar após quebra de regras
+
+    void showUnsolvableDialog();
+    void showLevelCompletedDialog();
 }
