@@ -14,10 +14,11 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import pt.ipbeja.app.model.interfaces.View;
-
+import pt.ipbeja.app.model.utilities.AudioPlayer;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Objects;
+
 
 
 /**
@@ -26,6 +27,8 @@ import java.util.Objects;
 public class SnowballGame extends Application implements View {
 
     private static final int CELL_SIZE = 60;
+
+    private Stage gameStage;  // Guarda o stage para manipular depois
 
     private BoardModel model;
     private GridPane grid;
@@ -38,23 +41,40 @@ public class SnowballGame extends Application implements View {
 
     private int moveCount = 0;
 
+    AudioPlayer audioPlayer = new AudioPlayer();
+
+
     @Override
     public void start(Stage primaryStage) {
-        this.model = new BoardModel(10, 10); // Adjust size to match level
+        throw new UnsupportedOperationException("Use StartingMenu to start the game.");
+    }
+
+
+    public void startFromFile(String levelFileName) {
+        gameStage = new Stage();
+
+        this.model = new BoardModel(10, 10); // adjust as needed
         this.model.setView(this);
         this.grid = new GridPane();
 
-        loadLevelFromFile("nivel2");
+        loadLevelFromFile(levelFileName.replace(".txt", "")); // strip .txt if necessary
+
+        // 🎵 Toca a música conforme o nível
+        if (levelFileName.equalsIgnoreCase("level1")) {
+            audioPlayer.play("mus1.wav");
+        } else if (levelFileName.equalsIgnoreCase("level2")) {
+            audioPlayer.play("mus2.wav");
+        }
 
         BorderPane mainLayout = createMainLayout();
         drawBoard();
 
-        Scene scene = new Scene(mainLayout, 10 * CELL_SIZE, 10 * CELL_SIZE + 40);
-        primaryStage.setTitle("Snowball Game");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-
+        Scene scene = new Scene(mainLayout, 10 * CELL_SIZE + 50, 10 * CELL_SIZE + 100);
+        gameStage.setTitle("Snowball Game - " + levelFileName);
+        gameStage.setScene(scene);
+        gameStage.show();
     }
+
 
     private BorderPane createMainLayout() {
         moveLog = new TextArea();
@@ -118,8 +138,46 @@ public class SnowballGame extends Application implements View {
     }
 
     @Override
+    public void returnToMenu() {
+        // para a música, se estiver a tocar
+        audioPlayer.stop();
+
+        // fecha a janela do jogo atual
+        if (gameStage != null) {
+            gameStage.close();
+        }
+
+        // reseta o modelo (limpa o tabuleiro)
+        model.resetGame();
+
+        // abre o menu inicial numa nova janela
+        StartingMenu menu = new StartingMenu();
+        try {
+            Stage menuStage = new Stage();
+            menu.start(menuStage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @Override
     public void gameCompleted() {
-        System.out.println("Game completed!"); // opcional
+        System.out.println("Game completed!");
+
+        if (gameStage != null) {
+            gameStage.close();  // Fecha a janela do jogo
+        }
+
+        // Abre novamente o menu inicial numa nova janela
+        StartingMenu menu = new StartingMenu();
+        try {
+            Stage menuStage = new Stage();
+            menu.start(menuStage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        audioPlayer.stop();
     }
 
 
@@ -136,7 +194,7 @@ public class SnowballGame extends Application implements View {
     // PICKAXE
     private void loadLevelFromFile(String levelName) {
         try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(Objects.requireNonNull(getClass().getResourceAsStream("/levels/nivel2.txt"))))) {
+                new InputStreamReader(Objects.requireNonNull(getClass().getResourceAsStream("/levels/" + levelName + ".txt"))))) {
                 //Para quando for dinamico, meter no metodo(String levelName): new InputStreamReader(getClass().getResourceAsStream("/levels/" + levelName + ".txt")))) {
 
             for (int row = 0; br.ready(); row++) {
@@ -153,7 +211,6 @@ public class SnowballGame extends Application implements View {
                     }
                 }
             }
-
             //if (model.getOnBoardChanged() != null) model.getOnBoardChanged().run();
 
         } catch (Exception e) {
@@ -251,7 +308,7 @@ public class SnowballGame extends Application implements View {
     }
 
 
-    public static void main(String[] args) {
+    /* public static void main(String[] args) {
         launch(args);
-    }
+    } */
 }

@@ -130,33 +130,33 @@ public class BoardModel {
             return tryToStack(originalSnowball, target, toRow, toCol);
         }
 
-        // Desempilha se for uma combinação
-        if (originalSnowball.getStatus() == SnowballStatus.MEDIUM_SMALL) {
-            originalSnowball.setStatus(SnowballStatus.MEDIUM);
-            Snowball small = new Snowball(toRow, toCol, SnowballStatus.SMALL);
-            snowballs.add(small);
-        } else if (originalSnowball.getStatus() == SnowballStatus.LARGE_SMALL) {
-            originalSnowball.setStatus(SnowballStatus.LARGE);
-            Snowball small = new Snowball(toRow, toCol, SnowballStatus.SMALL);
-            snowballs.add(small);
-        } else if (originalSnowball.getStatus() == SnowballStatus.LARGE_MEDIUM) {
-            originalSnowball.setStatus(SnowballStatus.LARGE);
-            Snowball medium = new Snowball(toRow, toCol, SnowballStatus.MEDIUM);
-            snowballs.add(medium);
-        } else {
-            // crescimento normal
-            if (getPositionContent(toRow, toCol) == PositionContent.SNOW &&
-                    (originalSnowball.getStatus() == SnowballStatus.SMALL ||
-                            originalSnowball.getStatus() == SnowballStatus.MEDIUM)) {
+        return handleSnowballMovement(originalSnowball, toRow, toCol);
+    }
 
-                originalSnowball.growSnowball();
-                board.get(toRow).set(toCol, PositionContent.NO_SNOW);
-            }
-            originalSnowball.setPosition(toRow, toCol);
-            return true;
+    private boolean handleSnowballMovement(Snowball snowball, int toRow, int toCol) {
+        switch (snowball.getStatus()) {
+            case MEDIUM_SMALL:
+                snowball.setStatus(SnowballStatus.MEDIUM);
+                snowballs.add(new Snowball(toRow, toCol, SnowballStatus.SMALL));
+                return true;
+            case LARGE_SMALL:
+                snowball.setStatus(SnowballStatus.LARGE);
+                snowballs.add(new Snowball(toRow, toCol, SnowballStatus.SMALL));
+                return true;
+            case LARGE_MEDIUM:
+                snowball.setStatus(SnowballStatus.LARGE);
+                snowballs.add(new Snowball(toRow, toCol, SnowballStatus.MEDIUM));
+                return true;
+            default:
+                if (getPositionContent(toRow, toCol) == PositionContent.SNOW &&
+                        (snowball.getStatus() == SnowballStatus.SMALL ||
+                                snowball.getStatus() == SnowballStatus.MEDIUM)) {
+                    snowball.growSnowball();
+                    board.get(toRow).set(toCol, PositionContent.NO_SNOW);
+                }
+                snowball.setPosition(toRow, toCol);
+                return true;
         }
-
-        return true;
     }
 
 
@@ -164,6 +164,14 @@ public class BoardModel {
      * Attempt to stack a snowball over another one in the target position.
      */
     private boolean tryToStack(Snowball moving, Snowball target, int row, int col) {
+        // Se a bola a mover é pequena ou média e o destino tem neve,
+        // a bola cresce consumindo a neve antes de empilhar
+        if (getPositionContent(row, col) == PositionContent.SNOW &&
+                (moving.getStatus() == SnowballStatus.SMALL || moving.getStatus() == SnowballStatus.MEDIUM)) {
+            moving.growSnowball();
+            board.get(row).set(col, PositionContent.NO_SNOW);
+        }
+
         SnowballStatus newStatus = switch (target.getStatus()) {
             case LARGE -> switch (moving.getStatus()) {
                 case MEDIUM -> SnowballStatus.LARGE_MEDIUM;
@@ -186,7 +194,6 @@ public class BoardModel {
         if (newStatus == SnowballStatus.FULL_SNOWMAN) {
             board.get(row).set(col, PositionContent.SNOWMAN);
         }
-
         return true;
     }
 
@@ -234,10 +241,13 @@ public class BoardModel {
             alert.setHeaderText(null);
             alert.setContentText("This game can no longer be completed.\nResetting the board...");
 
-            alert.setOnHidden(e -> resetGame());
+            alert.setOnHidden(e -> {
+                if (view != null) view.returnToMenu();
+            });
             alert.show();
         });
     }
+
 
     private void showLevelCompletedDialog() {
         javafx.application.Platform.runLater(() -> {
@@ -257,27 +267,15 @@ public class BoardModel {
     }
 
 
-    private void resetGame() {
+    public void resetGame() {
         snowballs.clear();
 
-        // limpa o conteúdo do board (exceto as bordas)
+        // Limpa o conteúdo do board (exceto as bordas)
         for (int row = 1; row < board.size() - 1; row++) {
             for (int col = 1; col < board.get(0).size() - 1; col++) {
                 board.get(row).set(col, PositionContent.NO_SNOW);
             }
         }
-
-        // adiciona bolas e neve de novo (exemplo simples)
-        setPositionContent(7, 4, PositionContent.SNOW);
-        setPositionContent(7, 5, PositionContent.SNOW);
-        setPositionContent(7, 6, PositionContent.SNOW);
-        setPositionContent(7, 7, PositionContent.SNOW);
-        setPositionContent(7, 8, PositionContent.SNOW);
-
-        // posições das bolas de neve (depois do reset)
-        snowballs.add(new Snowball(5, 3, SnowballStatus.SMALL));
-        snowballs.add(new Snowball(5, 4, SnowballStatus.MEDIUM));
-        snowballs.add(new Snowball(5, 6, SnowballStatus.LARGE));
 
         // Reposiciona o monstro no centro
         monster.setPosition(board.size() / 2, board.get(0).size() / 2);
@@ -287,10 +285,10 @@ public class BoardModel {
         // Notifica a UI do reset dos movimentos do monstro
         if (view != null) view.resetUI();
 
-
         // Reset do contador
         monsterPositions.clear();
     }
+
 
     public Snowball getSnowballAt(int row, int col) {
         for (Snowball ball : snowballs) {
@@ -357,11 +355,11 @@ public class BoardModel {
             for (int col = 0; col < board.get(0).size(); col++) {
                 if (getPositionContent(row, col) == PositionContent.SNOWMAN) {
                     char columnLetter = (char) ('A' + col);
-                    return "(" + row + "," + columnLetter + ")";
+                    return "(" + (row + 1) + "," + columnLetter + ")";
                 }
             }
         }
-        return "(not found)";
+        return "(not found snowman)";
     }
 
     private void writeLinesToFile(String filename, List<String> lines) {
@@ -397,8 +395,6 @@ public class BoardModel {
 
         writeLinesToFile(filename, lines);
     }
-
-
 
 
     public int getRowCount() {
