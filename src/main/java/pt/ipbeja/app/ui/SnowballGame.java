@@ -60,11 +60,11 @@ public class SnowballGame extends Application implements View {
         loadLevelFromFile(levelFileName.replace(".txt", "")); // strip .txt if necessary
 
         // 🎵 Toca a música conforme o nível
-        if (levelFileName.equalsIgnoreCase("level1")) {
+       /* if (levelFileName.equalsIgnoreCase("level1")) {
             audioPlayer.play("mus1.wav");
         } else if (levelFileName.equalsIgnoreCase("level2")) {
             audioPlayer.play("mus2.wav");
-        }
+        } */
 
         BorderPane mainLayout = createMainLayout();
         drawBoard();
@@ -178,6 +178,36 @@ public class SnowballGame extends Application implements View {
             e.printStackTrace();
         }
         audioPlayer.stop();
+    }
+
+    @Override
+    public void showUnsolvableDialog() {
+        javafx.application.Platform.runLater(() -> {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+            alert.setTitle("Game Over");
+            alert.setHeaderText(null);
+            alert.setContentText("This game can no longer be completed.\nResetting the board...");
+
+            alert.setOnHidden(e -> returnToMenu());
+            alert.show();
+        });
+    }
+
+    @Override
+    public void showLevelCompletedDialog() {
+        javafx.application.Platform.runLater(() -> {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+            alert.setTitle("You did it");
+            alert.setHeaderText(null);
+            alert.setContentText("Good job, you did a full snowman");
+
+            alert.setOnHidden(e -> {
+                gameCompleted();
+                model.saveMonsterPositionsToFile();
+                model.resetGame();
+            });
+            alert.show();
+        });
     }
 
 
