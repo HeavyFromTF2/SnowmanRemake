@@ -21,6 +21,15 @@ public class BoardModel {
     private final List<Snowball> snowballs = new ArrayList<>();
     private final List<String> monsterPositions = new ArrayList<>();
 
+    private String levelName;
+
+    public void setLevelName(String levelName) {
+        this.levelName = levelName;
+    }
+
+    public String getLevelName() {
+        return levelName;
+    }
 
     public void setView(View view) {
         this.view = view;
@@ -133,30 +142,32 @@ public class BoardModel {
         return handleSnowballMovement(originalSnowball, toRow, toCol);
     }
 
+
+    // TODO está aqui um bug que quando a bola está empilhada e é empurrada pra neve, ela nao a consome e fica igual (por decidir se vale a pena arranjar)
     private boolean handleSnowballMovement(Snowball snowball, int toRow, int toCol) {
+        if (getPositionContent(toRow, toCol) == PositionContent.SNOW &&
+                (snowball.getStatus() == SnowballStatus.SMALL || snowball.getStatus() == SnowballStatus.MEDIUM)) {
+            snowball.growSnowball();
+            board.get(toRow).set(toCol, PositionContent.NO_SNOW);
+        }
+
         switch (snowball.getStatus()) {
-            case MEDIUM_SMALL:
+            case MEDIUM_SMALL -> {
                 snowball.setStatus(SnowballStatus.MEDIUM);
                 snowballs.add(new Snowball(toRow, toCol, SnowballStatus.SMALL));
-                return true;
-            case LARGE_SMALL:
+            }
+            case LARGE_SMALL -> {
                 snowball.setStatus(SnowballStatus.LARGE);
                 snowballs.add(new Snowball(toRow, toCol, SnowballStatus.SMALL));
-                return true;
-            case LARGE_MEDIUM:
+            }
+            case LARGE_MEDIUM -> {
                 snowball.setStatus(SnowballStatus.LARGE);
                 snowballs.add(new Snowball(toRow, toCol, SnowballStatus.MEDIUM));
-                return true;
-            default:
-                if (getPositionContent(toRow, toCol) == PositionContent.SNOW &&
-                        (snowball.getStatus() == SnowballStatus.SMALL ||
-                                snowball.getStatus() == SnowballStatus.MEDIUM)) {
-                    snowball.growSnowball();
-                    board.get(toRow).set(toCol, PositionContent.NO_SNOW);
-                }
-                snowball.setPosition(toRow, toCol);
-                return true;
+            }
+            default -> snowball.setPosition(toRow, toCol);
         }
+
+        return true;
     }
 
 
@@ -191,7 +202,6 @@ public class BoardModel {
         target.setStatus(newStatus);
         snowballs.remove(moving);
 
-        System.out.println(newStatus);
         if (newStatus == SnowballStatus.FULL_SNOWMAN) {
             board.get(row).set(col, PositionContent.SNOWMAN);
         }

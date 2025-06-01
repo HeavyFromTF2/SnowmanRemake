@@ -15,10 +15,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import pt.ipbeja.app.model.interfaces.View;
 import pt.ipbeja.app.model.utilities.AudioPlayer;
+import pt.ipbeja.app.model.utilities.ScoreManager;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.Objects;
-
 
 
 /**
@@ -38,11 +40,17 @@ public class SnowballGame extends Application implements View {
     private TextArea moveLog;
     private Label moveCounterLabel;
     private Label monsterPositionLabel;
+    private Label scoreLabel; // Novo label para o score
 
     private int moveCount = 0;
 
     AudioPlayer audioPlayer = new AudioPlayer();
+    ScoreManager scoreManager = new ScoreManager();
+    public String playerName;
 
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
 
     @Override
     public void start(Stage primaryStage) {
@@ -56,11 +64,12 @@ public class SnowballGame extends Application implements View {
         this.model = new BoardModel(10, 10); // adjust as needed
         this.model.setView(this);
         this.grid = new GridPane();
+        this.model.setLevelName(levelFileName);
 
         loadLevelFromFile(levelFileName.replace(".txt", "")); // strip .txt if necessary
 
         // 🎵 Toca a música conforme o nível
-       if (levelFileName.equalsIgnoreCase("level1")) {
+        if (levelFileName.equalsIgnoreCase("level1")) {
             audioPlayer.play("mus1.wav");
         } else if (levelFileName.equalsIgnoreCase("level2")) {
             audioPlayer.play("mus2.wav");
@@ -72,6 +81,15 @@ public class SnowballGame extends Application implements View {
         Scene scene = new Scene(mainLayout, 10 * CELL_SIZE + 50, 10 * CELL_SIZE + 100);
         gameStage.setTitle("Snowball Game - " + levelFileName);
         gameStage.setScene(scene);
+
+        scoreManager.loadScores(model.getLevelName());
+        List<Score> topScores = scoreManager.getTopScores(levelFileName); // level1 ou level2
+        StringBuilder sb = new StringBuilder("Top Scores:\n");
+        for (Score s : topScores) {
+            sb.append(s.toString()).append("\n");
+        }
+        scoreLabel.setText(sb.toString());
+
         gameStage.show();
     }
 
@@ -87,9 +105,12 @@ public class SnowballGame extends Application implements View {
         int monsterRow = model.getMonsterRow();
         int monsterCol = model.getMonsterCol();
         char colLetter = (char) ('A' + monsterCol);
+
         monsterPositionLabel = new Label("Monster position: (" + (monsterRow + 1) + ", " + colLetter + ")");
 
-        VBox bottomBox = new VBox(moveCounterLabel, monsterPositionLabel, moveLog);
+        scoreLabel = new Label("Score: 0");
+
+        VBox bottomBox = new VBox(moveCounterLabel, monsterPositionLabel, scoreLabel, moveLog);
 
         BorderPane mainLayout = new BorderPane();
         mainLayout.setCenter(grid);
@@ -202,6 +223,9 @@ public class SnowballGame extends Application implements View {
             alert.setContentText("Good job, you did a full snowman");
 
             alert.setOnHidden(e -> {
+                scoreManager.loadScores(model.getLevelName()); // carrega os anteriores
+                scoreManager.addScore(new Score(playerName, model.getLevelName(), moveCount)); // guarda o novo
+
                 gameCompleted();
                 model.saveMonsterPositionsToFile();
                 model.resetGame();
@@ -220,12 +244,11 @@ public class SnowballGame extends Application implements View {
     }
 
 
-
     // PICKAXE
     private void loadLevelFromFile(String levelName) {
         try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(Objects.requireNonNull(getClass().getResourceAsStream("/levels/" + levelName + ".txt"))))) {
-                //Para quando for dinamico, meter no metodo(String levelName): new InputStreamReader(getClass().getResourceAsStream("/levels/" + levelName + ".txt")))) {
+            //Para quando for dinamico, meter no metodo(String levelName): new InputStreamReader(getClass().getResourceAsStream("/levels/" + levelName + ".txt")))) {
 
             for (int row = 0; br.ready(); row++) {
                 String[] tokens = br.readLine().trim().split("\\s+");
@@ -325,6 +348,7 @@ public class SnowballGame extends Application implements View {
         moveCount++;  // Conta o movimento
         moveCounterLabel.setText("Movements: " + moveCount);
 
+
         // Obtém nova posição
         int newRow = model.getMonsterRow();
         int newCol = model.getMonsterCol();
@@ -336,9 +360,4 @@ public class SnowballGame extends Application implements View {
 
         drawBoard();
     }
-
-
-    /* public static void main(String[] args) {
-        launch(args);
-    } */
 }
