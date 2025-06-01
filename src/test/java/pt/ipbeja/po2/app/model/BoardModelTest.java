@@ -11,7 +11,6 @@ class BoardModelTest {
     private BoardModel board;
     private Monster monster;
 
-
     @BeforeEach
     // Board normal cheia de neve
     void setUp() {
@@ -171,23 +170,92 @@ class BoardModelTest {
         Snowball stack = board.getSnowballAt(1, 2);
         assertEquals(SnowballStatus.LARGE_MEDIUM, stack.getStatus());
 
-        // Bola média em (1,1)
+        // Bola pequena em (2,2)
         Snowball smallBall = new Snowball(2, 2, SnowballStatus.SMALL);
         board.getSnowballs().add(smallBall);
 
-        // Monstro passa de (1,1) para (2,1)
+        // Monstro leva a pequena até cima
         board.moveMonster(MonsterDirections.DOWN);
-
-        // Monstro passa de (2,1) para (3,1)
         board.moveMonster(MonsterDirections.DOWN);
-
-        // Monstro passa de (3,1) para (3,2)
         board.moveMonster(MonsterDirections.RIGHT);
-
-        // Monstro passa de (3,2) para (2,2)
         board.moveMonster(MonsterDirections.UP);
 
         stack = board.getSnowballAt(1, 2);
         assertEquals(SnowballStatus.FULL_SNOWMAN, stack.getStatus());
+
+        // ✅ Aqui está a verificação adicional
+        assertEquals(PositionContent.SNOWMAN, board.getPositionContent(1, 2));
+    }
+
+
+
+
+    /**
+     * Testar que o monstro não se move para uma posição com BLOCK.
+     */
+    @Test
+    void testBlockedByBlock() {
+        board.setPositionContent(2, 3, PositionContent.BLOCK); // bloquear posição à direita
+        monster.setPosition(2, 2); // monstro no meio
+
+        board.moveMonster(MonsterDirections.RIGHT);
+
+        // Monstro deve continuar no mesmo sítio
+        assertEquals(2, board.getMonsterRow());
+        assertEquals(2, board.getMonsterCol());
+    }
+
+    /**
+     * Testar que empilhar duas bolas pequenas não é permitido.
+     */
+    @Test
+    void testInvalidStackSmallSmall() {
+        normalBoard();
+
+        // Bola pequena em (1,1) e outra em (1,2)
+        Snowball small1 = new Snowball(1, 1, SnowballStatus.SMALL);
+        Snowball small2 = new Snowball(1, 2, SnowballStatus.SMALL);
+        board.getSnowballs().add(small1);
+        board.getSnowballs().add(small2);
+
+        // Monstro em (1,0)
+        monster.setPosition(1, 0);
+
+        // Tenta empurrar small1 sobre small2
+        board.moveMonster(MonsterDirections.RIGHT);
+
+        // Ambos ainda devem existir como bolas separadas
+        Snowball result = board.getSnowballAt(1, 2);
+        assertEquals(SnowballStatus.SMALL, result.getStatus());
+
+        assertNotNull(board.getSnowballAt(1, 1));
+    }
+
+    /**
+     * Testar que o monstro não consegue empurrar uma bola para fora do tabuleiro.
+     */
+    @Test
+    void testPushSnowballOutOfBounds() {
+        // Criar tabuleiro limpo
+        normalBoard();
+
+        // Colocar bola pequena no canto (1,3)
+        Snowball smallBall = new Snowball(1, 3, SnowballStatus.SMALL);
+        board.getSnowballs().add(smallBall);
+
+        // Monstro em (1,2), vai tentar empurrar para a direita
+        monster.setPosition(1, 2);
+
+        // Tentar empurrar para fora
+        board.moveMonster(MonsterDirections.RIGHT);
+
+        // Bola deve continuar na mesma posição, pois não pode sair do tabuleiro
+        Snowball ball = board.getSnowballAt(1, 3);
+        assertNotNull(ball);
+        assertEquals(SnowballStatus.SMALL, ball.getStatus());
+
+        // Monstro não se moveu
+        assertEquals(1, board.getMonsterRow());
+        assertEquals(2, board.getMonsterCol());
     }
 }

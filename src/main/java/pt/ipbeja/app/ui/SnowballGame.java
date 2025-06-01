@@ -60,11 +60,11 @@ public class SnowballGame extends Application implements View {
         loadLevelFromFile(levelFileName.replace(".txt", "")); // strip .txt if necessary
 
         // 🎵 Toca a música conforme o nível
-       /* if (levelFileName.equalsIgnoreCase("level1")) {
+       if (levelFileName.equalsIgnoreCase("level1")) {
             audioPlayer.play("mus1.wav");
         } else if (levelFileName.equalsIgnoreCase("level2")) {
             audioPlayer.play("mus2.wav");
-        } */
+        }
 
         BorderPane mainLayout = createMainLayout();
         drawBoard();
