@@ -258,5 +258,4 @@ class BoardModelTest {
         assertEquals(1, board.getMonsterRow());
         assertEquals(2, board.getMonsterCol());
     }
-
 }
