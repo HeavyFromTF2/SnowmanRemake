@@ -15,7 +15,7 @@ public class StartingMenu extends Application {
     @Override
     public void start(Stage primaryStage) {
         Label title = createTitleLabel();
-        Label nameLabel = new Label("Enter your name (3 letters max):");
+        Label nameLabel = new Label("Enter your name (3 letters total):");
         TextField nameField = createNameField();
         Button level1Button = createLevelButton("Level 1", nameField, primaryStage, "level1");
         Button level2Button = createLevelButton("Level 2", nameField, primaryStage, "level2");
