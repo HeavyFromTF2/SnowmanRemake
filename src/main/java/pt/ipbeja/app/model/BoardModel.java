@@ -81,6 +81,7 @@ public class BoardModel {
 
     /**
      * Attempt to move the monster in the given direction.
+     * TODO os movimentos ilegais (para blocos) estão a ser contados. nao podem
      */
     public void moveMonster(MonsterDirections direction) {
         int currentRow = monster.getRow();
@@ -143,28 +144,35 @@ public class BoardModel {
     }
 
 
-    // TODO está aqui um bug que quando a bola está empilhada e é empurrada pra neve, ela nao a consome e fica igual (por decidir se vale a pena arranjar)
     private boolean handleSnowballMovement(Snowball snowball, int toRow, int toCol) {
-        if (getPositionContent(toRow, toCol) == PositionContent.SNOW &&
-                (snowball.getStatus() == SnowballStatus.SMALL || snowball.getStatus() == SnowballStatus.MEDIUM)) {
-            snowball.growSnowball();
-            board.get(toRow).set(toCol, PositionContent.NO_SNOW);
-        }
+        Snowball actualBall = snowball;
 
         switch (snowball.getStatus()) {
             case MEDIUM_SMALL -> {
                 snowball.setStatus(SnowballStatus.MEDIUM);
-                snowballs.add(new Snowball(toRow, toCol, SnowballStatus.SMALL));
+                actualBall = new Snowball(toRow, toCol, SnowballStatus.SMALL);
+                snowballs.add(actualBall);
             }
             case LARGE_SMALL -> {
                 snowball.setStatus(SnowballStatus.LARGE);
-                snowballs.add(new Snowball(toRow, toCol, SnowballStatus.SMALL));
+                actualBall = new Snowball(toRow, toCol, SnowballStatus.SMALL);
+                snowballs.add(actualBall);
             }
             case LARGE_MEDIUM -> {
                 snowball.setStatus(SnowballStatus.LARGE);
-                snowballs.add(new Snowball(toRow, toCol, SnowballStatus.MEDIUM));
+                actualBall = new Snowball(toRow, toCol, SnowballStatus.MEDIUM);
+                snowballs.add(actualBall);
             }
-            default -> snowball.setPosition(toRow, toCol);
+            default -> {
+                actualBall.setPosition(toRow, toCol);
+            }
+        }
+
+        // Agora verifica se o conteúdo é SNOW e a bola pode crescer
+        if (getPositionContent(toRow, toCol) == PositionContent.SNOW &&
+                (actualBall.getStatus() == SnowballStatus.SMALL || actualBall.getStatus() == SnowballStatus.MEDIUM)) {
+            actualBall.growSnowball();
+            board.get(toRow).set(toCol, PositionContent.NO_SNOW);
         }
 
         return true;

@@ -84,6 +84,9 @@ public class SnowballGame extends Application implements View {
 
         scoreManager.loadScores(model.getLevelName());
         List<Score> topScores = scoreManager.getTopScores(levelFileName); // level1 ou level2
+
+        // TODO tenho que meter a VBOX aqui a ir para o lado direito, e que so mostre os scores depois de acabar o jogo
+
         StringBuilder sb = new StringBuilder("Top Scores:\n");
         for (Score s : topScores) {
             sb.append(s.toString()).append("\n");
