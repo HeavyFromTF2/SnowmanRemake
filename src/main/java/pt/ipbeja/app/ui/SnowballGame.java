@@ -34,13 +34,13 @@ public class SnowballGame extends Application implements View {
 
     private BoardModel model;
     private GridPane grid;
+    private VBox scoreBoxRight;
 
     private MonsterDirections currentDirection = MonsterDirections.DOWN;
 
     private TextArea moveLog;
     private Label moveCounterLabel;
     private Label monsterPositionLabel;
-    private Label scoreLabel; // Novo label para o score
 
     private int moveCount = 0;
 
@@ -78,25 +78,14 @@ public class SnowballGame extends Application implements View {
         BorderPane mainLayout = createMainLayout();
         drawBoard();
 
-        Scene scene = new Scene(mainLayout, 10 * CELL_SIZE + 50, 10 * CELL_SIZE + 100);
+        Scene scene = new Scene(mainLayout, 10 * CELL_SIZE + 200, 10 * CELL_SIZE + 100);
         gameStage.setTitle("Snowball Game - " + levelFileName);
         gameStage.setScene(scene);
-
-        scoreManager.loadScores(model.getLevelName());
-        List<Score> topScores = scoreManager.getTopScores(levelFileName); // level1 ou level2
-
-        // TODO tenho que meter a VBOX aqui a ir para o lado direito, e que so mostre os scores depois de acabar o jogo
-
-        StringBuilder sb = new StringBuilder("Top Scores:\n");
-        for (Score s : topScores) {
-            sb.append(s.toString()).append("\n");
-        }
-        scoreLabel.setText(sb.toString());
 
         gameStage.show();
     }
 
-
+            // 20 ";"
     private BorderPane createMainLayout() {
         moveLog = new TextArea();
         moveLog.setEditable(false);
@@ -111,13 +100,20 @@ public class SnowballGame extends Application implements View {
 
         monsterPositionLabel = new Label("Monster position: (" + (monsterRow + 1) + ", " + colLetter + ")");
 
-        scoreLabel = new Label("Score: 0");
+        VBox bottomBox = new VBox(moveCounterLabel, monsterPositionLabel, moveLog);
 
-        VBox bottomBox = new VBox(moveCounterLabel, monsterPositionLabel, scoreLabel, moveLog);
+        // --- VBOX PARA OS SCORES À DIREITA ---
+        scoreBoxRight = new VBox();
+        scoreBoxRight.setSpacing(10);
+        scoreBoxRight.setAlignment(Pos.TOP_CENTER);
+        scoreBoxRight.setStyle("-fx-padding: 10; -fx-border-color: gray; -fx-border-width: 1;");
+        scoreBoxRight.setVisible(false); // Oculta inicialmente
+        // ------------------------------------
 
         BorderPane mainLayout = new BorderPane();
         mainLayout.setCenter(grid);
         mainLayout.setBottom(bottomBox);
+        mainLayout.setRight(scoreBoxRight);
 
         return mainLayout;
     }
@@ -207,10 +203,12 @@ public class SnowballGame extends Application implements View {
     @Override
     public void showUnsolvableDialog() {
         javafx.application.Platform.runLater(() -> {
+            showFinalScorePanel(); //  Mostra scores antes do alerta
+
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
             alert.setTitle("Game Over");
             alert.setHeaderText(null);
-            alert.setContentText("This game can no longer be completed.\nResetting the board...");
+            alert.setContentText("This game can no longer be completed.\nYou lost!...");
 
             alert.setOnHidden(e -> returnToMenu());
             alert.show();
@@ -220,21 +218,44 @@ public class SnowballGame extends Application implements View {
     @Override
     public void showLevelCompletedDialog() {
         javafx.application.Platform.runLater(() -> {
+            scoreManager.addScore(new Score(playerName, model.getLevelName(), moveCount));  // guarda o score
+
+            showFinalScorePanel(); // Depois mostra o painel com os top 3 já atualizados
+
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-            alert.setTitle("You did it");
+            alert.setTitle("🏆 You did it! 🏆");
             alert.setHeaderText(null);
-            alert.setContentText("Good job, you did a full snowman");
+            alert.setContentText("Good job, you built a snowman! How cool!");
 
             alert.setOnHidden(e -> {
-                scoreManager.loadScores(model.getLevelName()); // carrega os anteriores
-                scoreManager.addScore(new Score(playerName, model.getLevelName(), moveCount)); // guarda o novo
-
+                // Guarda score
+                scoreManager.addScore(new Score(playerName, model.getLevelName(), moveCount));
                 gameCompleted();
                 model.saveMonsterPositionsToFile();
                 model.resetGame();
             });
+
             alert.show();
         });
+    }
+
+    private void showFinalScorePanel() {
+        scoreBoxRight.getChildren().clear();
+
+        Label title = new Label("🎯 Final Score");
+        Label current = new Label("Player: " + playerName + "\nLevel: " + model.getLevelName() + "\nMoves: " + moveCount);
+
+        List<Score> topScores = scoreManager.getTopScores(model.getLevelName());
+
+        StringBuilder sb = new StringBuilder("🏆 Top 3 Scores:\n");
+        for (Score s : topScores) {
+            sb.append(s.getPlayerName()).append(" - ").append(s.getMoves()).append(" moves\n");
+        }
+
+        Label topScoresLabel = new Label(sb.toString());
+
+        scoreBoxRight.getChildren().addAll(title, current, topScoresLabel);
+        scoreBoxRight.setVisible(true);
     }
 
 

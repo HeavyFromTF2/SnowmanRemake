@@ -70,7 +70,6 @@ public class BoardModel {
         return this.monster.getCol();
     }
 
-
     /**
      * Get the PositionContent at a specific location.
      */
@@ -81,7 +80,7 @@ public class BoardModel {
 
     /**
      * Attempt to move the monster in the given direction.
-     * TODO os movimentos ilegais (para blocos) estão a ser contados. nao podem
+     * POR VER: Mover bolas na parede da molhongo (incrementa o move counter. ver isso)
      */
     public void moveMonster(MonsterDirections direction) {
         int currentRow = monster.getRow();
@@ -389,7 +388,7 @@ public class BoardModel {
         lines.add("MOVEMENT LOG OF MONSTER:");
         lines.add(String.join(" ", monsterPositions));  // todos na mesma linha
         lines.add("TOTAL MOVEMENTS: " + monsterPositions.size());
-        lines.add("SNOWMAN POSITION: " + findSnowmanPosition());            //TODO acho que as coordenadas tao fdds
+        lines.add("SNOWMAN POSITION: " + findSnowmanPosition());
 
         writeLinesToFile(filename, lines);
     }
