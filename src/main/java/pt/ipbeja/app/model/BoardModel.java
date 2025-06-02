@@ -21,6 +21,15 @@ public class BoardModel {
     private final List<Snowball> snowballs = new ArrayList<>();
     private final List<String> monsterPositions = new ArrayList<>();
 
+    private String levelName;
+
+    public void setLevelName(String levelName) {
+        this.levelName = levelName;
+    }
+
+    public String getLevelName() {
+        return levelName;
+    }
 
     public void setView(View view) {
         this.view = view;
@@ -72,6 +81,7 @@ public class BoardModel {
 
     /**
      * Attempt to move the monster in the given direction.
+     * TODO os movimentos ilegais (para blocos) estão a ser contados. nao podem
      */
     public void moveMonster(MonsterDirections direction) {
         int currentRow = monster.getRow();
@@ -133,30 +143,39 @@ public class BoardModel {
         return handleSnowballMovement(originalSnowball, toRow, toCol);
     }
 
+
     private boolean handleSnowballMovement(Snowball snowball, int toRow, int toCol) {
+        Snowball actualBall = snowball;
+
         switch (snowball.getStatus()) {
-            case MEDIUM_SMALL:
+            case MEDIUM_SMALL -> {
                 snowball.setStatus(SnowballStatus.MEDIUM);
-                snowballs.add(new Snowball(toRow, toCol, SnowballStatus.SMALL));
-                return true;
-            case LARGE_SMALL:
+                actualBall = new Snowball(toRow, toCol, SnowballStatus.SMALL);
+                snowballs.add(actualBall);
+            }
+            case LARGE_SMALL -> {
                 snowball.setStatus(SnowballStatus.LARGE);
-                snowballs.add(new Snowball(toRow, toCol, SnowballStatus.SMALL));
-                return true;
-            case LARGE_MEDIUM:
+                actualBall = new Snowball(toRow, toCol, SnowballStatus.SMALL);
+                snowballs.add(actualBall);
+            }
+            case LARGE_MEDIUM -> {
                 snowball.setStatus(SnowballStatus.LARGE);
-                snowballs.add(new Snowball(toRow, toCol, SnowballStatus.MEDIUM));
-                return true;
-            default:
-                if (getPositionContent(toRow, toCol) == PositionContent.SNOW &&
-                        (snowball.getStatus() == SnowballStatus.SMALL ||
-                                snowball.getStatus() == SnowballStatus.MEDIUM)) {
-                    snowball.growSnowball();
-                    board.get(toRow).set(toCol, PositionContent.NO_SNOW);
-                }
-                snowball.setPosition(toRow, toCol);
-                return true;
+                actualBall = new Snowball(toRow, toCol, SnowballStatus.MEDIUM);
+                snowballs.add(actualBall);
+            }
+            default -> {
+                actualBall.setPosition(toRow, toCol);
+            }
         }
+
+        // Agora verifica se o conteúdo é SNOW e a bola pode crescer
+        if (getPositionContent(toRow, toCol) == PositionContent.SNOW &&
+                (actualBall.getStatus() == SnowballStatus.SMALL || actualBall.getStatus() == SnowballStatus.MEDIUM)) {
+            actualBall.growSnowball();
+            board.get(toRow).set(toCol, PositionContent.NO_SNOW);
+        }
+
+        return true;
     }
 
 
@@ -191,7 +210,6 @@ public class BoardModel {
         target.setStatus(newStatus);
         snowballs.remove(moving);
 
-        System.out.println(newStatus);
         if (newStatus == SnowballStatus.FULL_SNOWMAN) {
             board.get(row).set(col, PositionContent.SNOWMAN);
         }

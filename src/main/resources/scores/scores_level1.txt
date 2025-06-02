@@ -1,0 +1,3 @@
+AAA;level1;28
+CCC;level1;28
+AXZ;level1;32
