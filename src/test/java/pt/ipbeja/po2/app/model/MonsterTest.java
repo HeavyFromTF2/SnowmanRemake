@@ -26,21 +26,6 @@ public class MonsterTest {
     }
 
     /**
-     * Tabuleiro sem neve para testes mais neutros.
-     */
-    void normalBoard() {
-        board = new BoardModel(5, 5);
-        monster = new Monster(1, 0);
-        board.setMonster(monster);
-
-        for (int r = 1; r < board.getRowCount() - 1; r++) {
-            for (int c = 1; c < board.getColCount() - 1; c++) {
-                board.setPositionContent(r, c, PositionContent.NO_SNOW);
-            }
-        }
-    }
-
-    /**
      * Testar movimento do monstro para uma posição livre para a esquerda.
      */
     @Test
@@ -52,6 +37,20 @@ public class MonsterTest {
 
         assertEquals(2, board.getMonsterRow());
         assertEquals(1, board.getMonsterCol());
+    }
+
+    /**
+     * Testar movimento do monstro para uma posição livre para a esquerda.
+     */
+    @Test
+    void testMonsterToDown() {
+        assertEquals(2, board.getMonsterRow());
+        assertEquals(2, board.getMonsterCol());
+
+        board.moveMonster(MonsterDirections.DOWN);
+
+        assertEquals(3, board.getMonsterRow());
+        assertEquals(2, board.getMonsterCol());
     }
 
     /**

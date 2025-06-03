@@ -1,6 +1,11 @@
 package pt.ipbeja.app.model.interfaces;
 
-// Em principio a view ta bem feita. Pode ter algo mal tho
+/**
+ * Martim Dias - 24290
+ * Interface para comunicação entre o modelo e a interface gráfica (View).
+ * Define métodos que a interface gráfica deve implementar para refletir alterações do jogo.
+ */
+
 public interface View {
     void updateBoard();
     void resetUI();  // opcional: por ex. para contador de movimentos lol

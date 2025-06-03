@@ -5,11 +5,23 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Martim Dias - 24290
+ * Classe utilitária para gerir os scores de cada nível.
+ *
+ * Responsável por carregar, guardar e atualizar os melhores scores,
+ * armazenando apenas os 3 melhores por nível.
+ */
 
 public class ScoreManager {
     private static final String FILE_DIR = "src/main/resources/scores/";
     private List<Score> highScores = new ArrayList<>();
 
+    /**
+     * Carrega os scores do ficheiro correspondente ao nível.
+     *
+     * @param levelName nome do nível
+     */
     public void loadScores(String levelName) {
         highScores.clear();
         File file = new File(FILE_DIR + "scores_" + levelName + ".txt");
@@ -29,9 +41,14 @@ public class ScoreManager {
         }
     }
 
+    /**
+     * Guarda os scores no ficheiro correspondente ao nível.
+     *
+     * @param levelName nome do nível
+     */
     public void saveScores(String levelName) {
         File file = new File(FILE_DIR + "scores_" + levelName + ".txt");
-        file.getParentFile().mkdirs(); // cria a pasta se não existir
+        file.getParentFile().mkdirs(); // Cria o dir se não existir
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
             for (Score score : highScores) {
@@ -42,11 +59,15 @@ public class ScoreManager {
         }
     }
 
+    /**
+     * Adiciona um novo score e atualiza o ficheiro com os 3 melhores.
+     *
+     * @param newScore novo score a adicionar
+     */
     public void addScore(Score newScore) {
         String levelName = newScore.getLevelName();
 
-        // Carrega antes de adicionar, para garantir que temos os atuais
-        loadScores(levelName);
+        loadScores(levelName); // garantir que os atuais scores estão carregados
 
         highScores.add(newScore);
 
@@ -60,6 +81,12 @@ public class ScoreManager {
         saveScores(levelName);
     }
 
+    /**
+     * Obtém os 3 melhores scores para o nível especificado.
+     *
+     * @param levelName nome do nível
+     * @return lista com os 3 melhores scores
+     */
     public List<Score> getTopScores(String levelName) {
         loadScores(levelName); // Garantir que está carregado
         return highScores.stream()

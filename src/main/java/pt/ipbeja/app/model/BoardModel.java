@@ -10,8 +10,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+
+// TODO onde foi usado chatgpt terá que ser comentado
+
 /**
- * The game board model, holding a grid of PositionContent.
+ * Martim Dias - 24290
+ * TODO comentar totalmente esta classe E possivelmente separar para uma classe diferente as regras
  */
 public class BoardModel {
     private View view;
@@ -36,7 +40,9 @@ public class BoardModel {
     }
 
     /**
-     * Create a board with the given dimensions, all positions NO_SNOW.
+     * Construtor de tabuleiro padrão para testes e debug manuais.
+     * Cria um tabuleiro com bordas de BLOCK e interior NO_SNOW.
+     * É FOCADO EM TESTES, JÁ QUE OS NIVEIS CARREGAM DOS FICHEIROS TXT (por decidir se mantenho)
      */
     public BoardModel(int rows, int cols) {
 
@@ -264,6 +270,7 @@ public class BoardModel {
         }
     }
 
+    // TODO retiro metodos destes? na teoria ja n precisa resetar, pq o jogo volta ao menu
     public void resetGame() {
         snowballs.clear();
 
