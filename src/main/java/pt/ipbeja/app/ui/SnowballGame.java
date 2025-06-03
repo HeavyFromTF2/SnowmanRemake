@@ -2,7 +2,6 @@ package pt.ipbeja.app.ui;
 
 import javafx.application.Application;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -22,9 +21,9 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Objects;
 
-
 /**
- * The JavaFX main game window.
+ * Martim Dias - 24290
+ * TODO comentar totalmente esta classe
  */
 public class SnowballGame extends Application implements View {
 

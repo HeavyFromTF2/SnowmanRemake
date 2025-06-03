@@ -1,10 +1,8 @@
 package pt.ipbeja.app.model;
 
 /**
-    ENUM with all of the possible cases of
-    what can be in a particular position
-
-    MARTIM DIAS
+ * Martim Dias - 24290
+ * Define o conteúdo possível de uma posição do tabuleiro.
  */
 
 public enum PositionContent {
