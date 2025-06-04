@@ -124,10 +124,10 @@ public class BoardModel {
 
         Snowball snowball = getSnowballAt(targetRow, targetCol);
         if (snowball != null) {
-            int dRow = targetRow - currentRow;
-            int dCol = targetCol - currentCol;
+            int rowOffSet = targetRow - currentRow;
+            int colOffSet = targetCol - currentCol;
 
-            boolean pushed = tryToPushSnowball(targetRow, targetCol, dRow, dCol);
+            boolean pushed = tryToPushSnowball(targetRow, targetCol, rowOffSet, colOffSet);
 
             // Só move o monstro se a bola foi empurrada com sucesso
             if (pushed) {
@@ -461,6 +461,10 @@ public class BoardModel {
 
     public int getColCount() {
         return board.get(0).size(); // número de colunas (tamanho da primeira linha)
+    }
+
+    public int getMoveCount() {
+        return monsterPositions.size();
     }
 
     public void setMonster(Monster monster) { this.monster = monster; }

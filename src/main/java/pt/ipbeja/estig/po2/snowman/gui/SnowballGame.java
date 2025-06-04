@@ -382,6 +382,7 @@ public class SnowballGame extends Application implements View {
         };
     }
 
+    //TODO tem 21 ";"
     private void handleCellClick(int targetRow, int targetCol) {
         int currentRow = model.getMonsterRow();
         int currentCol = model.getMonsterCol();
@@ -406,7 +407,7 @@ public class SnowballGame extends Application implements View {
         // Move o monstro
         model.moveMonster(currentDirection);
         moveCount++;  // Conta o movimento
-        moveCounterLabel.setText("Movements: " + moveCount);
+        moveCounterLabel.setText("Movements: " + model.getMoveCount());
 
 
         // Obtém nova posição
