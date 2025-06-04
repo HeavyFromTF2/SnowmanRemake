@@ -324,7 +324,7 @@ public class SnowballGame extends Application implements View {
                     }
                 }
             }
-            //if (model.getOnBoardChanged() != null) model.getOnBoardChanged().run();
+            model.saveState(); //Para o primeiro caso do undo redo
 
         } catch (Exception e) {
             System.err.println("Error loading level: " + e.getMessage());

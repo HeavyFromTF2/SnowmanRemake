@@ -148,9 +148,9 @@ public class BoardModel {
     /**
      * Attempt to move the snowball in the given direction.
      */
-    private boolean tryToPushSnowball(int fromRow, int fromCol, int dRow, int dCol) {
-        int toRow = fromRow + dRow;
-        int toCol = fromCol + dCol;
+    private boolean tryToPushSnowball(int fromRow, int fromCol, int rowOffSet, int colOffSet) {
+        int toRow = fromRow + rowOffSet;
+        int toCol = fromCol + colOffSet;
 
         if (!isInsideBoard(toRow, toCol)) return false;
         if (getPositionContent(toRow, toCol) == PositionContent.BLOCK) return false;
@@ -467,7 +467,9 @@ public class BoardModel {
         return monsterPositions.size();
     }
 
-    public void setMonster(Monster monster) { this.monster = monster; }
+    public void setMonster(Monster monster) {
+        this.monster = monster;
+    }
 
     /**
      * Show a warning dialog if the game can no longer be completed,
