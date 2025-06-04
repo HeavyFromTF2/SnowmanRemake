@@ -1,4 +1,4 @@
-package pt.ipbeja.app.model.interfaces;
+package pt.ipbeja.estig.po2.snowman.model.interfaces;
 
 /**
  * Martim Dias - 24290

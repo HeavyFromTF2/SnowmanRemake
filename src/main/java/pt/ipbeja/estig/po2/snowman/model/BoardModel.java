@@ -1,6 +1,6 @@
-package pt.ipbeja.app.model;
+package pt.ipbeja.estig.po2.snowman.model;
 
-import pt.ipbeja.app.model.interfaces.View;
+import pt.ipbeja.estig.po2.snowman.model.interfaces.View;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -24,6 +24,10 @@ public class BoardModel {
     private final List<List<PositionContent>> board;
     private final List<Snowball> snowballs = new ArrayList<>();
     private final List<String> monsterPositions = new ArrayList<>();
+
+    // NOVO: histórico dos estados para Undo/Redo
+    private final List<GameState> history = new ArrayList<>();
+    private int currentStateIndex = -1;
 
     private String levelName;
 
@@ -84,11 +88,24 @@ public class BoardModel {
     }
 
 
+    public void saveState() {
+        // Remove estados "à frente" caso o utilizador tenha feito Undo antes
+        while (history.size() > currentStateIndex + 1) {
+            history.remove(history.size() - 1);
+        }
+
+        GameState snapshot = cloneCurrentState();
+        history.add(snapshot);
+        currentStateIndex++;
+    }
+
+
     /**
      * Attempt to move the monster in the given direction.
      * POR VER: Mover bolas na parede da molhongo (incrementa o move counter. ver isso)
      */
     public void moveMonster(MonsterDirections direction) {
+
         int currentRow = monster.getRow();
         int currentCol = monster.getCol();
 
@@ -123,6 +140,7 @@ public class BoardModel {
             // Movimento sem bola — pode andar normalmente
             monster.moveTo(targetRow, targetCol);
         }
+        saveState();
         addMonsterPositionToLog();
         checkLevelCompleted();
     }
@@ -254,21 +272,56 @@ public class BoardModel {
         }
     }
 
-    /**
-     * Show a warning dialog if the game can no longer be completed,
-     * then reset the game after user clicks OK.
-     */
-    private void showUnsolvableDialog() {
-        if (view != null) {
-            view.showUnsolvableDialog();
+    public void undo() {
+        if (currentStateIndex > 0) {
+            currentStateIndex--;
+            applyState(history.get(currentStateIndex));
+            if (view != null) {
+                view.updateBoard();
+                view.resetUI();
+            }
         }
     }
 
-    private void showLevelCompletedDialog() {
-        if (view != null) {
-            view.showLevelCompletedDialog();
+    public void redo() {
+        if (currentStateIndex < history.size() - 1) {
+            currentStateIndex++;
+            applyState(history.get(currentStateIndex));
+            if (view != null) {
+                view.updateBoard();
+                view.resetUI();
+            }
         }
     }
+
+    private GameState cloneCurrentState() {
+        List<List<PositionContent>> boardCopy = new ArrayList<>();
+        for (List<PositionContent> row : board) {
+            boardCopy.add(new ArrayList<>(row));
+        }
+
+        List<Snowball> snowballCopy = new ArrayList<>();
+        for (Snowball s : snowballs) {
+            snowballCopy.add(new Snowball(s.getRow(), s.getCol(), s.getStatus()));
+        }
+
+        Monster clonedMonster = new Monster(monster.getRow(), monster.getCol());
+
+        return new GameState(boardCopy, snowballCopy, clonedMonster);
+    }
+
+    private void applyState(GameState state) {
+        board.clear();
+        for (List<PositionContent> row : state.board()) {
+            board.add(new ArrayList<>(row));
+        }
+
+        snowballs.clear();
+        snowballs.addAll(state.snowballs());
+
+        monster = new Monster(state.monster().getRow(), state.monster().getCol());
+    }
+
 
     // TODO retiro metodos destes? na teoria ja n precisa resetar, pq o jogo volta ao menu
     public void resetGame() {
@@ -412,6 +465,21 @@ public class BoardModel {
 
     public void setMonster(Monster monster) { this.monster = monster; }
 
+    /**
+     * Show a warning dialog if the game can no longer be completed,
+     * then reset the game after user clicks OK.
+     */
+    private void showUnsolvableDialog() {
+        if (view != null) {
+            view.showUnsolvableDialog();
+        }
+    }
+
+    private void showLevelCompletedDialog() {
+        if (view != null) {
+            view.showLevelCompletedDialog();
+        }
+    }
 }
 
 

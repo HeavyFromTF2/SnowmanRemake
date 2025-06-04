@@ -1,4 +1,4 @@
-package pt.ipbeja.app.model;
+package pt.ipbeja.estig.po2.snowman.model;
 
 /**
  * Martim Dias - 24290

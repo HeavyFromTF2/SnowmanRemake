@@ -1,3 +1,5 @@
+package pt.ipbeja.estig.po2.snowman.model;
+
 /**
  * Martim Dias - 24290
  * Representa o monstro controlado pelo jogador no tabuleiro.
@@ -5,9 +7,6 @@
  * Esta classe estende ´MobileElement´, o que significa que o monstro é movel.
  * Ele pode se mover pelo mapa, mudando a posição
  */
-package pt.ipbeja.app.model;
-
-
 public class Monster extends MobileElement {
     /**
      * Construtor que define a posição inicial do monstro.

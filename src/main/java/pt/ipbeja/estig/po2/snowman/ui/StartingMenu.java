@@ -3,7 +3,7 @@
  * Classe responsável pelo menu inicial do jogo
  */
 
-package pt.ipbeja.app.ui;
+package pt.ipbeja.estig.po2.snowman.ui;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -18,7 +18,6 @@ public class StartingMenu extends Application {
     /**
      * Métod0 principal da interface gráfica. Cria todos os elementos visuais do menu inicial.
      * @param primaryStage Janela principal da aplicação
-     *
      */
     @Override
     public void start(Stage primaryStage) {
@@ -45,7 +44,7 @@ public class StartingMenu extends Application {
      */
     private TextField createNameField() {
         TextField field = new TextField();
-        field.setPromptText("e.g. ABC");
+        field.setPromptText("EX. JOE");
         field.setMaxWidth(100);
         return field;
     }
