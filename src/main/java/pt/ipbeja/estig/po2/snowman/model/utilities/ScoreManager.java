@@ -1,6 +1,6 @@
-package pt.ipbeja.app.model.utilities;
+package pt.ipbeja.estig.po2.snowman.model.utilities;
 
-import pt.ipbeja.app.model.Score;
+import pt.ipbeja.estig.po2.snowman.model.Score;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;

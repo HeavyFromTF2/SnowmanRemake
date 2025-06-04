@@ -2,7 +2,7 @@ package pt.ipbeja.po2.app.model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import pt.ipbeja.app.model.*;
+import pt.ipbeja.estig.po2.snowman.model.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 

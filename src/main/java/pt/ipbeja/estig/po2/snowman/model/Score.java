@@ -1,3 +1,5 @@
+package pt.ipbeja.estig.po2.snowman.model;
+
 /**
  * Martim Dias - 24290
  * Representa o score de um jogador num determinado nível.
@@ -5,8 +7,6 @@
  * Um score é composto pelo nome do jogador, nome do nível e número de movimentos realizados.
  * Quanto menor o número de movimentos, melhor o score.
  */
-package pt.ipbeja.app.model;
-
 public class Score implements Comparable<Score> {
     private String playerName;
     private String levelName;

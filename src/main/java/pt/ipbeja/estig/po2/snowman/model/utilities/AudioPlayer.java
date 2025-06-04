@@ -1,4 +1,4 @@
-package pt.ipbeja.app.model.utilities;
+package pt.ipbeja.estig.po2.snowman.model.utilities;
 
 import javax.sound.sampled.*;
 import java.io.BufferedInputStream;

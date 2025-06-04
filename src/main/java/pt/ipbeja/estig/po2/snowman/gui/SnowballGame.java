@@ -1,4 +1,4 @@
-package pt.ipbeja.app.ui;
+package pt.ipbeja.estig.po2.snowman.gui;
 
 import javafx.application.Application;
 import javafx.geometry.Pos;
@@ -7,14 +7,18 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import pt.ipbeja.app.model.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import pt.ipbeja.app.model.interfaces.View;
-import pt.ipbeja.app.model.utilities.AudioPlayer;
-import pt.ipbeja.app.model.utilities.ScoreManager;
+import pt.ipbeja.estig.po2.snowman.model.*;
+import pt.ipbeja.estig.po2.snowman.model.interfaces.View;
+import pt.ipbeja.estig.po2.snowman.model.utilities.AudioPlayer;
+import pt.ipbeja.estig.po2.snowman.model.utilities.ScoreManager;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -75,6 +79,10 @@ public class SnowballGame extends Application implements View {
         }
 
         BorderPane mainLayout = createMainLayout();
+
+        VBox topContainer = createMenuBar(); // novo mét0do
+        mainLayout.setTop(topContainer);
+
         drawBoard();
 
         Scene scene = new Scene(mainLayout, 10 * CELL_SIZE + 200, 10 * CELL_SIZE + 100);
@@ -84,7 +92,36 @@ public class SnowballGame extends Application implements View {
         gameStage.show();
     }
 
-            // 20 ";"
+    /**
+     * Cria uma barra de menu simplificada com opções Edit (Undo/Redo) e Quit.
+     * @return VBox contendo a barra de menu.
+     */
+    private VBox createMenuBar() {
+        MenuBar menuBar = new MenuBar();
+
+        Menu editMenu = new Menu("Edit");
+
+        MenuItem undoItem = new MenuItem("Undo");
+        undoItem.setOnAction(e -> model.undo());
+
+        MenuItem redoItem = new MenuItem("Redo");
+        redoItem.setOnAction(e -> model.redo());
+
+        editMenu.getItems().addAll(undoItem, redoItem);
+
+        Menu quitMenu = new Menu("Quit");
+        MenuItem exitItem = new MenuItem("Return to Menu");
+        exitItem.setOnAction(e -> returnToMenu());
+        quitMenu.getItems().add(exitItem);
+
+        menuBar.getMenus().addAll(editMenu, quitMenu);
+
+        VBox topContainer = new VBox(menuBar);
+        return topContainer;
+    }
+
+
+    // 20 ";"
     private BorderPane createMainLayout() {
         moveLog = new TextArea();
         moveLog.setEditable(false);
@@ -287,7 +324,7 @@ public class SnowballGame extends Application implements View {
                     }
                 }
             }
-            //if (model.getOnBoardChanged() != null) model.getOnBoardChanged().run();
+            model.saveState(); //Para o primeiro caso do undo redo
 
         } catch (Exception e) {
             System.err.println("Error loading level: " + e.getMessage());
@@ -345,6 +382,7 @@ public class SnowballGame extends Application implements View {
         };
     }
 
+    //TODO tem 21 ";"
     private void handleCellClick(int targetRow, int targetCol) {
         int currentRow = model.getMonsterRow();
         int currentCol = model.getMonsterCol();
@@ -369,7 +407,7 @@ public class SnowballGame extends Application implements View {
         // Move o monstro
         model.moveMonster(currentDirection);
         moveCount++;  // Conta o movimento
-        moveCounterLabel.setText("Movements: " + moveCount);
+        moveCounterLabel.setText("Movements: " + model.getMoveCount());
 
 
         // Obtém nova posição
