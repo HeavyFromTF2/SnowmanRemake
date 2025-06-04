@@ -3,7 +3,7 @@
  * Classe responsável pelo menu inicial do jogo
  */
 
-package pt.ipbeja.estig.po2.snowman.ui;
+package pt.ipbeja.estig.po2.snowman.gui;
 
 import javafx.application.Application;
 import javafx.scene.Scene;

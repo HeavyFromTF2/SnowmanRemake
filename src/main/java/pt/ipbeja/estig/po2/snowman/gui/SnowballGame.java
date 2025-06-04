@@ -1,4 +1,4 @@
-package pt.ipbeja.estig.po2.snowman.ui;
+package pt.ipbeja.estig.po2.snowman.gui;
 
 import javafx.application.Application;
 import javafx.geometry.Pos;
@@ -18,8 +18,6 @@ import pt.ipbeja.estig.po2.snowman.model.utilities.ScoreManager;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.layout.VBox;
 
 
 import java.io.BufferedReader;
