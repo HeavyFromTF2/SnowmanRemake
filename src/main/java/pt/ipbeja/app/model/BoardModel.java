@@ -392,6 +392,7 @@ public class BoardModel {
         lines.add("MAP:");
         lines.addAll(getMapLines());
 
+        lines.add("LEVEL PLAYED: " + levelName);
         lines.add("MOVEMENT LOG OF MONSTER:");
         lines.add(String.join(" ", monsterPositions));  // todos na mesma linha
         lines.add("TOTAL MOVEMENTS: " + monsterPositions.size());

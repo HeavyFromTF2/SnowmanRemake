@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Objects;
+import java.util.Stack;
 
 /**
  * Martim Dias - 24290
