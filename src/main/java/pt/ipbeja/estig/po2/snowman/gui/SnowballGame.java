@@ -19,7 +19,6 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
@@ -45,9 +44,10 @@ public class SnowballGame extends Application implements View {
     private Label moveCounterLabel;
     private Label monsterPositionLabel;
 
+    public String playerName;
+
     AudioPlayer audioPlayer = new AudioPlayer();
     ScoreManager scoreManager = new ScoreManager();
-    public String playerName;
 
     public void setPlayerName(String playerName) {
         this.playerName = playerName;
@@ -375,7 +375,6 @@ public class SnowballGame extends Application implements View {
             case BLOCK -> "/images/block.png";
             case SNOWMAN -> "/images/complete_snowman.png";  // Usar nome correto da imagem
             case NO_SNOW -> "/images/no_snow.png";
-            default -> "/images/no_snow.png";
         };
     }
 
