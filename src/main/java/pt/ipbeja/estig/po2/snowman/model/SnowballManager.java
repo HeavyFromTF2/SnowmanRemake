@@ -77,7 +77,7 @@ public class SnowballManager {
      * @param snowball bola de neve a mover
      * @param toRow linha para onde a bola deve ser movida
      * @param toCol coluna para onde a bola deve ser movida
-     * @return sempre retorna true pois o movimento é efetuado se chegar a este método
+     * @return sempre retorna true pois o movimento é efetuado se chegar a este mét0do
      */
     private boolean handleSnowballMovement(Snowball snowball, int toRow, int toCol) {
         Snowball actualBall = snowball;
