@@ -1,3 +1,3 @@
-KKM;level1;3
-KKM;level1;3
-NJU;level1;4
+FFD;level1;28
+FFD;level1;28
+HHG;level1;30

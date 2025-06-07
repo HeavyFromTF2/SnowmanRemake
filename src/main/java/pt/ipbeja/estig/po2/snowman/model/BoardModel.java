@@ -283,6 +283,7 @@ public class BoardModel {
         }
     }
 
+    //TODO o redo está a resetar o contador no score, nao pode
     public void redo() {
         if (currentStateIndex < history.size() - 1) {
             currentStateIndex++;

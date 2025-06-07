@@ -45,8 +45,6 @@ public class SnowballGame extends Application implements View {
     private Label moveCounterLabel;
     private Label monsterPositionLabel;
 
-    private int moveCount = 0;
-
     AudioPlayer audioPlayer = new AudioPlayer();
     ScoreManager scoreManager = new ScoreManager();
     public String playerName;
@@ -188,7 +186,6 @@ public class SnowballGame extends Application implements View {
 
     @Override
     public void resetUI() {
-        moveCount = 0;
         moveCounterLabel.setText("Movements: 0");
         moveLog.clear();
     }
@@ -254,7 +251,7 @@ public class SnowballGame extends Application implements View {
     @Override
     public void showLevelCompletedDialog() {
         javafx.application.Platform.runLater(() -> {
-            scoreManager.addScore(new Score(playerName, model.getLevelName(), moveCount));  // guarda o score
+            scoreManager.addScore(new Score(playerName, model.getLevelName(), model.getMoveCount()));  // guarda o score
 
             showFinalScorePanel(); // Depois mostra o painel com os top 3 já atualizados
 
@@ -265,7 +262,7 @@ public class SnowballGame extends Application implements View {
 
             alert.setOnHidden(e -> {
                 // Guarda score
-                scoreManager.addScore(new Score(playerName, model.getLevelName(), moveCount));
+                scoreManager.addScore(new Score(playerName, model.getLevelName(), model.getMoveCount()));
                 gameCompleted();
                 model.saveMonsterPositionsToFile();
                 model.resetGame();
@@ -279,7 +276,7 @@ public class SnowballGame extends Application implements View {
         scoreBoxRight.getChildren().clear();
 
         Label title = new Label("🎯 Final Score");
-        Label current = new Label("Player: " + playerName + "\nLevel: " + model.getLevelName() + "\nMoves: " + moveCount);
+        Label current = new Label("Player: " + playerName + "\nLevel: " + model.getLevelName() + "\nMoves: " + model.getMoveCount());
 
         List<Score> topScores = scoreManager.getTopScores(model.getLevelName());
 
@@ -406,7 +403,7 @@ public class SnowballGame extends Application implements View {
 
         // Move o monstro
         model.moveMonster(currentDirection);
-        moveCount++;  // Conta o movimento
+
         moveCounterLabel.setText("Movements: " + model.getMoveCount());
 
 
