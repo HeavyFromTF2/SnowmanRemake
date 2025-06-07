@@ -16,7 +16,7 @@ public class BoardModel {
     private final List<Snowball> snowballs = new ArrayList<>();
     final List<String> monsterPositions = new ArrayList<>();
     private final MovementLogger movementLogger;
-
+    private final SnowballManager snowballManager;
 
     // Histórico dos estados para Undo/Redo
     private final List<GameState> history = new ArrayList<>();
@@ -42,7 +42,7 @@ public class BoardModel {
         }
 
         movementLogger = new MovementLogger(this);
-
+        snowballManager = new SnowballManager(this);  // aqui
     }
 
     // --- Getters e Setters ---
@@ -82,6 +82,10 @@ public class BoardModel {
         return this.snowballs;
     }
 
+    public SnowballManager getSnowballManager() {
+        return this.snowballManager;
+    }
+
     public int getRowCount() {
         return board.size();
     }
@@ -112,15 +116,15 @@ public class BoardModel {
         if (!isInsideBoard(targetRow, targetCol)) return;
         if (getPositionContent(targetRow, targetCol) == PositionContent.BLOCK) return;
 
-        Snowball snowball = getSnowballAt(targetRow, targetCol);
+        Snowball snowball = snowballManager.getSnowballAt(targetRow, targetCol);
         if (snowball != null) {
             int rowOffSet = targetRow - currentRow;
             int colOffSet = targetCol - currentCol;
 
-            boolean pushed = tryToPushSnowball(targetRow, targetCol, rowOffSet, colOffSet);
+            boolean pushed = snowballManager.tryToPushSnowball(targetRow, targetCol, rowOffSet, colOffSet);
 
             if (pushed) {
-                Snowball remaining = getSnowballAt(targetRow, targetCol);
+                Snowball remaining = snowballManager.getSnowballAt(targetRow, targetCol);
                 if (remaining == null || (remaining.getRow() != targetRow || remaining.getCol() != targetCol)) {
                     monster.moveTo(targetRow, targetCol);
                 }
@@ -133,103 +137,13 @@ public class BoardModel {
         checkLevelCompleted();
     }
 
-    private boolean tryToPushSnowball(int fromRow, int fromCol, int rowOffSet, int colOffSet) {
-        int toRow = fromRow + rowOffSet;
-        int toCol = fromCol + colOffSet;
-
-        if (!isInsideBoard(toRow, toCol)) return false;
-        if (getPositionContent(toRow, toCol) == PositionContent.BLOCK) return false;
-
-        Snowball originalSnowball = getSnowballAt(fromRow, fromCol);
-        if (originalSnowball == null) return false;
-
-        Snowball target = getSnowballAt(toRow, toCol);
-        if (target != null) {
-            return tryToStack(originalSnowball, target, toRow, toCol);
-        }
-
-        return handleSnowballMovement(originalSnowball, toRow, toCol);
-    }
-
-    private boolean handleSnowballMovement(Snowball snowball, int toRow, int toCol) {
-        Snowball actualBall = snowball;
-
-        switch (snowball.getStatus()) {
-            case MEDIUM_SMALL -> {
-                snowball.setStatus(SnowballStatus.MEDIUM);
-                actualBall = new Snowball(toRow, toCol, SnowballStatus.SMALL);
-                snowballs.add(actualBall);
-            }
-            case LARGE_SMALL -> {
-                snowball.setStatus(SnowballStatus.LARGE);
-                actualBall = new Snowball(toRow, toCol, SnowballStatus.SMALL);
-                snowballs.add(actualBall);
-            }
-            case LARGE_MEDIUM -> {
-                snowball.setStatus(SnowballStatus.LARGE);
-                actualBall = new Snowball(toRow, toCol, SnowballStatus.MEDIUM);
-                snowballs.add(actualBall);
-            }
-            default -> {
-                actualBall.setPosition(toRow, toCol);
-            }
-        }
-
-        if (getPositionContent(toRow, toCol) == PositionContent.SNOW &&
-                (actualBall.getStatus() == SnowballStatus.SMALL || actualBall.getStatus() == SnowballStatus.MEDIUM)) {
-            actualBall.growSnowball();
-            board.get(toRow).set(toCol, PositionContent.NO_SNOW);
-        }
-
-        return true;
-    }
-
-    private boolean tryToStack(Snowball moving, Snowball target, int row, int col) {
-        if (getPositionContent(row, col) == PositionContent.SNOW &&
-                (moving.getStatus() == SnowballStatus.SMALL || moving.getStatus() == SnowballStatus.MEDIUM)) {
-            moving.growSnowball();
-            board.get(row).set(col, PositionContent.NO_SNOW);
-        }
-
-        SnowballStatus newStatus = switch (target.getStatus()) {
-            case LARGE -> switch (moving.getStatus()) {
-                case MEDIUM -> SnowballStatus.LARGE_MEDIUM;
-                case SMALL -> SnowballStatus.LARGE_SMALL;
-                default -> null;
-            };
-            case MEDIUM -> switch (moving.getStatus()) {
-                case SMALL -> SnowballStatus.MEDIUM_SMALL;
-                default -> null;
-            };
-            case LARGE_MEDIUM -> moving.getStatus() == SnowballStatus.SMALL ? SnowballStatus.FULL_SNOWMAN : null;
-            default -> null;
-        };
-
-        if (newStatus == null) return false;
-
-        target.setStatus(newStatus);
-        snowballs.remove(moving);
-
-        if (newStatus == SnowballStatus.FULL_SNOWMAN) {
-            board.get(row).set(col, PositionContent.SNOWMAN);
-        }
-        return true;
-    }
-
-    public Snowball getSnowballAt(int row, int col) {
-        for (Snowball ball : snowballs) {
-            if (ball.getRow() == row && ball.getCol() == col) return ball;
-        }
-        return null;
-    }
-
     // --- Validação ---
     public boolean canMoveTo(int row, int col) {
         if (!isInsideBoard(row, col)) return false;
         return getPositionContent(row, col) != PositionContent.BLOCK;
     }
 
-    private boolean isInsideBoard(int row, int col) {
+    boolean isInsideBoard(int row, int col) {
         return row >= 0 && row < board.size() && col >= 0 && col < board.get(0).size();
     }
 

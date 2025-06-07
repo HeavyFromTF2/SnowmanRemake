@@ -34,9 +34,9 @@ public class SnowballInvalidCasesTest {
 
         board.moveMonster(MonsterDirections.RIGHT);
 
-        Snowball result = board.getSnowballAt(1, 2);
+        Snowball result = board.getSnowballManager().getSnowballAt(1, 2);
         assertEquals(SnowballStatus.SMALL, result.getStatus());
-        assertNotNull(board.getSnowballAt(1, 1));
+        assertNotNull(board.getSnowballManager().getSnowballAt(1, 1));
     }
 
     @Test
@@ -47,7 +47,7 @@ public class SnowballInvalidCasesTest {
         board.getSnowballs().add(small);
         board.moveMonster(MonsterDirections.RIGHT);
 
-        Snowball result = board.getSnowballAt(1, 3);
+        Snowball result = board.getSnowballManager().getSnowballAt(1, 3);
         assertNotNull(result);
         assertEquals(SnowballStatus.SMALL, result.getStatus());
 

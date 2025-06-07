@@ -34,7 +34,7 @@ public class SnowballGrowthTest {
 
         board.moveMonster(MonsterDirections.RIGHT);
 
-        Snowball result = board.getSnowballAt(2, 3);
+        Snowball result = board.getSnowballManager().getSnowballAt(2, 3);
         assertNotNull(result);
         assertEquals(SnowballStatus.MEDIUM, result.getStatus());
         assertEquals(PositionContent.NO_SNOW, board.getPositionContent(2, 3));
@@ -47,7 +47,7 @@ public class SnowballGrowthTest {
 
         board.moveMonster(MonsterDirections.RIGHT);
 
-        Snowball result = board.getSnowballAt(2, 3);
+        Snowball result = board.getSnowballManager().getSnowballAt(2, 3);
         assertNotNull(result);
         assertEquals(SnowballStatus.LARGE, result.getStatus());
         assertEquals(PositionContent.NO_SNOW, board.getPositionContent(2, 3));
@@ -60,7 +60,7 @@ public class SnowballGrowthTest {
 
         board.moveMonster(MonsterDirections.RIGHT);
 
-        Snowball result = board.getSnowballAt(2, 3);
+        Snowball result = board.getSnowballManager().getSnowballAt(2, 3);
         assertNotNull(result);
         assertEquals(SnowballStatus.LARGE, result.getStatus());
         assertEquals(PositionContent.SNOW, board.getPositionContent(2, 3)); // Neve permanece

@@ -356,7 +356,7 @@ public class SnowballGame extends Application implements View {
         }
 
         // Se existir uma bola de neve na posição, mostrar a imagem correta
-        Snowball snowball = model.getSnowballAt(row, col);
+        Snowball snowball = model.getSnowballManager().getSnowballAt(row, col);
         if (snowball != null) {
             return switch (snowball.getStatus()) {
                 case SMALL -> "/images/small_snowball.png";

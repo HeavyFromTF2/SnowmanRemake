@@ -34,7 +34,7 @@ public class SnowmanCreationTest {
 
         board.moveMonster(MonsterDirections.RIGHT);
 
-        Snowball stack = board.getSnowballAt(1, 2);
+        Snowball stack = board.getSnowballManager().getSnowballAt(1, 2);
         assertEquals(SnowballStatus.LARGE_MEDIUM, stack.getStatus());
     }
 
@@ -54,7 +54,7 @@ public class SnowmanCreationTest {
         board.moveMonster(MonsterDirections.RIGHT);
         board.moveMonster(MonsterDirections.UP);
 
-        Snowball stack = board.getSnowballAt(1, 2);
+        Snowball stack = board.getSnowballManager().getSnowballAt(1, 2);
         assertEquals(SnowballStatus.FULL_SNOWMAN, stack.getStatus());
         assertEquals(PositionContent.SNOWMAN, board.getPositionContent(1, 2));
     }
