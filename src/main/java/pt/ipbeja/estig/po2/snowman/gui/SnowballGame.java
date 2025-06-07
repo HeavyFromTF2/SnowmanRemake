@@ -26,6 +26,7 @@ import java.util.Objects;
 
 /**
  * Martim Dias - 24290
+ * Rafael Picareta - 24288
  * TODO comentar totalmente esta classe
  */
 public class SnowballGame extends Application implements View {
