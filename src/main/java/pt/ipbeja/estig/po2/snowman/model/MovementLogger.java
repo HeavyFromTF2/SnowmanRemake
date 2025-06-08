@@ -8,7 +8,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * Martim Dias - 24290
  *
@@ -17,7 +16,7 @@ import java.util.List;
  */
 public class MovementLogger {
 
-    /** Referência ao modelo do tabuleiro do jogo. */
+    // Referência ao modelo do tabuleiro do jogo.
     private final BoardModel boardModel;
 
     /**
@@ -34,8 +33,8 @@ public class MovementLogger {
      * A posição é formatada como "(linha, letraColuna)".
      */
     public void addMonsterPositionToLog() {
-        char colunaLetra = (char) ('A' + boardModel.getMonsterCol());
-        String pos = "(" + boardModel.getMonsterRow() + "," + colunaLetra + ")";
+        char colLetter = (char) ('A' + boardModel.getMonsterCol());
+        String pos = "(" + boardModel.getMonsterRow() + "," + colLetter + ")";
         // Nota: o campo 'monsterPositions' deve ser package-private ou acessível via getter/setter
         boardModel.monsterPositions.add(pos);
     }
@@ -50,21 +49,21 @@ public class MovementLogger {
         String filename = folderName + "/" + generateFilename();
 
         List<String> lines = new ArrayList<>();
-        lines.add("MAPA:");
+        lines.add("MAP:");
         lines.addAll(getMapLines());
 
-        lines.add("NÍVEL JOGADO: " + boardModel.getLevelName());
-        lines.add("REGISTO DE MOVIMENTOS DO MONSTRO:");
+        lines.add("LEVEL PLAYED: " + boardModel.getLevelName());
+        lines.add("MONSTER MOVEMENT LOG:");
         lines.add(String.join(" ", boardModel.monsterPositions));
-        lines.add("TOTAL DE MOVIMENTOS: " + boardModel.monsterPositions.size());
-        lines.add("POSIÇÃO DO BONECO DE NEVE: " + findSnowmanPosition());
+        lines.add("TOTAL MOVEMENTS (SCORE): " + boardModel.monsterPositions.size());
+        lines.add("SNOWMAN POSITION: " + findSnowmanPosition());
 
         writeLinesToFile(filename, lines);
     }
 
     /**
      * Gera um nome para o ficheiro de log com base na data e hora atual,
-     * usando o formato "snowmanYYYYMMDDHHMMSS.txt".
+     * com o formato "snowmanYYYYMMDDHHMMSS.txt".
      *
      * @return o nome do ficheiro com timestamp
      */
@@ -105,18 +104,18 @@ public class MovementLogger {
      * formatada como "(linha, letraColuna)", onde as linhas começam em 1.
      * Caso não seja encontrado, devolve uma string indicativa.
      *
-     * @return posição formatada do boneco de neve ou "(não encontrado boneco de neve)"
+     * @return posição formatada do boneco de neve ou diz se não foi feito
      */
     private String findSnowmanPosition() {
         for (int row = 0; row < boardModel.getRowCount(); row++) {
             for (int col = 0; col < boardModel.getColCount(); col++) {
                 if (boardModel.getPositionContent(row, col) == PositionContent.SNOWMAN) {
-                    char colunaLetra = (char) ('A' + col);
-                    return "(" + (row + 1) + "," + colunaLetra + ")";
+                    char colLetter = (char) ('A' + col);
+                    return "(" + (row + 1) + "," + colLetter + ")";
                 }
             }
         }
-        return "(não encontrado boneco de neve)";
+        return "(No snowman found)";
     }
 
     /**

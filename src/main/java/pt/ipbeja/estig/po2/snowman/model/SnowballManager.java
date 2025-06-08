@@ -3,9 +3,12 @@ package pt.ipbeja.estig.po2.snowman.model;
 import java.util.List;
 
 /**
+ * Martim Dias - 24290
+ *
  * Classe responsável pela gestão das bolas de neve no tabuleiro do jogo,
- * incluindo movimentação, empurrar e empilhar bolas de neve.
+ * inclui movimentação, empurrar e empilhações de bolas de neve.
  */
+
 public class SnowballManager {
 
     /** Referência ao modelo do tabuleiro do jogo. */

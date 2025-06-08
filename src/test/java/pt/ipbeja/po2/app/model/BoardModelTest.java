@@ -1,15 +1,23 @@
 package pt.ipbeja.po2.app.model;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pt.ipbeja.estig.po2.snowman.model.BoardModel;
 import pt.ipbeja.estig.po2.snowman.model.PositionContent;
-
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Martim Dias - 24290
+ *
+ * Testes para verificar o estado inicial do tabuleiro,
+ * para ver se as bordas são BLOCK e o interior NO_SNOW.
+ */
 class BoardModelTest {
 
-    // TODO fazer pelo menos um teste melhor que este, é mt genérico
-
+    /**
+     * Verifica se o tabuleiro é iniciado com as bordas em BLOCK e o interior com NO_SNOW.
+     */
+    @DisplayName("Initial board has BLOCK on borders and NO_SNOW inside")
     @Test
     void testInitialBoardHasNoSnowInsideAndBlocksOnBorders() {
         BoardModel board = new BoardModel(5, 5);
@@ -32,6 +40,4 @@ class BoardModelTest {
             }
         }
     }
-
-
 }

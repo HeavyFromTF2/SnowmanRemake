@@ -18,7 +18,6 @@ import pt.ipbeja.estig.po2.snowman.model.utilities.ScoreManager;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
@@ -27,50 +26,70 @@ import java.util.Objects;
 /**
  * Martim Dias - 24290
  * Rafael Picareta - 24288
- * TODO comentar totalmente esta classe
+ *
+ * Classe principal da interface gráfica do jogo Snowball.
+ * Responsável pela criação da janela do jogo,
+ * interação com o utilizador e atualização visual do tabuleiro.
+ * Implementa a interface {@link View} para receber atualizações do modelo.
  */
 public class SnowballGame extends Application implements View {
-
     private static final int CELL_SIZE = 60;
-
-    private Stage gameStage;  // Guarda o stage para manipular depois
-
+    private Stage gameStage;
     private BoardModel model;
     private GridPane grid;
     private VBox scoreBoxRight;
-
-    private MonsterDirections currentDirection = MonsterDirections.DOWN;
-
     private TextArea moveLog;
     private Label moveCounterLabel;
     private Label monsterPositionLabel;
-
     public String playerName;
+    private MonsterDirections currentDirection = MonsterDirections.DOWN;
+    private BoardRenderer boardRenderer;
 
     AudioPlayer audioPlayer = new AudioPlayer();
     ScoreManager scoreManager = new ScoreManager();
 
+    // --- Set do nome do Jogador ---
+
+    /**
+     * Define o nome do jogador atual.
+     * @param playerName Nome do jogador
+     */
     public void setPlayerName(String playerName) {
         this.playerName = playerName;
     }
 
+    // --- Inicio do Jogo ---
+
+    /**
+     * Mét0do start padrão do JavaFX.
+     * Está desativado pois o jogo deve ser iniciado com o startFromFile()
+     *
+     * @param primaryStage Stage principal recebido pelo JavaFX
+     * @throws UnsupportedOperationException sempre
+     */
     @Override
     public void start(Stage primaryStage) {
         throw new UnsupportedOperationException("Use StartingMenu to start the game.");
     }
 
-
+    /**
+     * Inicia o jogo a partir de um ficheiro de nível.
+     * Cria a janela do jogo, carrega o nível e configura a interface.
+     *
+     * @param levelFileName Nome do ficheiro do nível (ex: "level1.txt")
+     */
     public void startFromFile(String levelFileName) {
         gameStage = new Stage();
 
-        this.model = new BoardModel(10, 10); // adjust as needed
+        this.model = new BoardModel(10, 10); // Cria tabuleiro 10x10 (pode ajustar)
         this.model.setView(this);
         this.grid = new GridPane();
+        this.boardRenderer = new BoardRenderer(model, grid, CELL_SIZE, currentDirection, this::handleCellClick);
         this.model.setLevelName(levelFileName);
 
-        loadLevelFromFile(levelFileName.replace(".txt", "")); // strip .txt if necessary
+        loadLevelFromFile(levelFileName.replace(".txt", "")); // Carrega o nível do ficheiro
 
-        // 🎵 Toca a música conforme o nível
+        // Toca música correspondente ao nível
         if (levelFileName.equalsIgnoreCase("level1")) {
             audioPlayer.play("mus1.wav");
         } else if (levelFileName.equalsIgnoreCase("level2")) {
@@ -79,12 +98,12 @@ public class SnowballGame extends Application implements View {
 
         BorderPane mainLayout = createMainLayout();
 
-        VBox topContainer = createMenuBar(); // novo mét0do
+        VBox topContainer = createMenuBar(); // Cria barra de menus
         mainLayout.setTop(topContainer);
 
-        drawBoard();
+        boardRenderer.drawBoard(); // Desenha o tabuleiro inicialmente
 
-        Scene scene = new Scene(mainLayout, 10 * CELL_SIZE + 200, 10 * CELL_SIZE + 100);
+        Scene scene = new Scene(mainLayout, 10 * CELL_SIZE + 150, 10 * CELL_SIZE + 100);
         gameStage.setTitle("Snowball Game - " + levelFileName);
         gameStage.setScene(scene);
 
@@ -92,8 +111,9 @@ public class SnowballGame extends Application implements View {
     }
 
     /**
-     * Cria uma barra de menu simplificada com opções Edit (Undo/Redo) e Quit.
-     * @return VBox contendo a barra de menu.
+     * Cria e devolve uma VBox contendo a barra de menus (Undo, Redo, Quit).
+     *
+     * @return VBox com a MenuBar pronta para usar
      */
     private VBox createMenuBar() {
         MenuBar menuBar = new MenuBar();
@@ -119,8 +139,12 @@ public class SnowballGame extends Application implements View {
         return topContainer;
     }
 
-
-    // 20 ";"
+    /**
+     * Cria o layout principal do jogo, incluindo o tabuleiro,
+     * área de texto com histórico de movimentos e painel de scores.
+     *
+     * @return BorderPane com toda a interface configurada
+     */
     private BorderPane createMainLayout() {
         moveLog = new TextArea();
         moveLog.setEditable(false);
@@ -128,7 +152,7 @@ public class SnowballGame extends Application implements View {
 
         moveCounterLabel = new Label("Movements: 0");
 
-        // Posição inicial do monstro
+        // Obtem posição inicial do monstro para mostrar
         int monsterRow = model.getMonsterRow();
         int monsterCol = model.getMonsterCol();
         char colLetter = (char) ('A' + monsterCol);
@@ -137,13 +161,12 @@ public class SnowballGame extends Application implements View {
 
         VBox bottomBox = new VBox(moveCounterLabel, monsterPositionLabel, moveLog);
 
-        // --- VBOX PARA OS SCORES À DIREITA ---
+        // VBOX para mostrar scores à direita (inicialmente escondida)
         scoreBoxRight = new VBox();
         scoreBoxRight.setSpacing(10);
         scoreBoxRight.setAlignment(Pos.TOP_CENTER);
-        scoreBoxRight.setStyle("-fx-padding: 10; -fx-border-color: gray; -fx-border-width: 1;");
-        scoreBoxRight.setVisible(false); // Oculta inicialmente
-        // ------------------------------------
+        scoreBoxRight.setStyle("-fx-padding: 10; -fx-border-color: gray;");
+        scoreBoxRight.setVisible(false);
 
         BorderPane mainLayout = new BorderPane();
         mainLayout.setCenter(grid);
@@ -153,58 +176,43 @@ public class SnowballGame extends Application implements View {
         return mainLayout;
     }
 
-    private void drawBoard() {
-        grid.getChildren().clear();
+    // --- Atualizações da Interface ---
 
-        int rows = model.getRowCount();
-        int cols = model.getColCount();
-
-        // Adiciona letras das colunas (topo) e números das linhas (esquerda)
-        for (int i = 0; i < Math.max(rows, cols); i++) {
-            if (i < cols) {
-                char colLetter = (char) ('A' + i);
-                Label colLabel = createHeaderLabel(String.valueOf(colLetter));
-                grid.add(colLabel, i + 1, 0);
-            }
-            if (i < rows) {
-                Label rowLabel = createHeaderLabel(String.valueOf(i + 1));
-                grid.add(rowLabel, 0, i + 1);
-            }
-        }
-
-        // Adiciona as células do tabuleiro
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < cols; col++) {
-                grid.add(createCell(row, col), col + 1, row + 1);
-            }
-        }
-    }
-
+    /**
+     * Atualiza o tabuleiro visualmente chamando o BoardRenderer.
+     * Chamado pelo modelo quando há mudanças no jogo.
+     */
     @Override
     public void updateBoard() {
-        drawBoard();
+        boardRenderer.drawBoard();
     }
 
+    /**
+     * Reseta os elementos da interface relacionados a movimentos e logs.
+     * Chamado pelo modelo para reiniciar a UI.
+     */
     @Override
     public void resetUI() {
         moveCounterLabel.setText("Movements: 0");
         moveLog.clear();
     }
 
+    // --- Controlo de Eventos do Jogo ---
+
+    /**
+     * Fecha a janela atual do jogo e retorna ao menu inicial.
+     * Também para o áudio e reseta o estado do modelo.
+     */
     @Override
     public void returnToMenu() {
-        // para a música, se estiver a tocar
         audioPlayer.stop();
 
-        // fecha a janela do jogo atual
         if (gameStage != null) {
             gameStage.close();
         }
 
-        // reseta o modelo (limpa o tabuleiro)
         model.resetGame();
 
-        // abre o menu inicial numa nova janela
         StartingMenu menu = new StartingMenu();
         try {
             Stage menuStage = new Stage();
@@ -214,16 +222,18 @@ public class SnowballGame extends Application implements View {
         }
     }
 
-
+    /**
+     * Trata o final do jogo quando o jogador completa o nível.
+     * Fecha a janela atual e reabre o menu inicial.
+     */
     @Override
     public void gameCompleted() {
         System.out.println("Game completed!");
 
         if (gameStage != null) {
-            gameStage.close();  // Fecha a janela do jogo
+            gameStage.close();
         }
 
-        // Abre novamente o menu inicial numa nova janela
         StartingMenu menu = new StartingMenu();
         try {
             Stage menuStage = new Stage();
@@ -234,10 +244,16 @@ public class SnowballGame extends Application implements View {
         audioPlayer.stop();
     }
 
+    // --- Diálogos Finais e Scores ---
+
+    /**
+     * Mostra um diálogo de aviso quando o jogo não tem solução possível.
+     * Depois de fechar o alerta, retorna ao menu principal.
+     */
     @Override
     public void showUnsolvableDialog() {
         javafx.application.Platform.runLater(() -> {
-            showFinalScorePanel(); //  Mostra scores antes do alerta
+            showFinalScorePanel(); // Mostra scores antes do alerta
 
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
             alert.setTitle("Game Over");
@@ -249,12 +265,16 @@ public class SnowballGame extends Application implements View {
         });
     }
 
+    /**
+     * Mostra um diálogo de sucesso ao completar o nível.
+     * Atualiza os scores, mostra painel de resultados e depois fecha o jogo.
+     */
     @Override
     public void showLevelCompletedDialog() {
         javafx.application.Platform.runLater(() -> {
-            scoreManager.addScore(new Score(playerName, model.getLevelName(), model.getMoveCount()));  // guarda o score
+            scoreManager.addScore(new Score(playerName, model.getLevelName(), model.getMoveCount()));
 
-            showFinalScorePanel(); // Depois mostra o painel com os top 3 já atualizados
+            showFinalScorePanel();
 
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
             alert.setTitle("🏆 You did it! 🏆");
@@ -262,7 +282,6 @@ public class SnowballGame extends Application implements View {
             alert.setContentText("Good job, you built a snowman! How cool!");
 
             alert.setOnHidden(e -> {
-                // Guarda score
                 scoreManager.addScore(new Score(playerName, model.getLevelName(), model.getMoveCount()));
                 gameCompleted();
                 model.saveMonsterPositionsToFile();
@@ -273,6 +292,9 @@ public class SnowballGame extends Application implements View {
         });
     }
 
+    /**
+     * Atualiza o painel de scores à direita com o score atual e os top 3 scores (atualiza se o novo score for top 3).
+     */
     private void showFinalScorePanel() {
         scoreBoxRight.getChildren().clear();
 
@@ -292,21 +314,17 @@ public class SnowballGame extends Application implements View {
         scoreBoxRight.setVisible(true);
     }
 
+    // --- Carregamento de Nível ---
 
-    private Label createHeaderLabel(String text) {
-        Label label = new Label(text);
-        label.setMinSize(40, 40);
-        label.setAlignment(Pos.CENTER);
-        label.setStyle("-fx-font-weight: bold;");
-        return label;
-    }
-
-
-    // PICKAXE
+    /**
+     * Lê o ficheiro do nível e popula o modelo com o conteúdo do tabuleiro.
+     * Suporta múltiplos tipos de conteúdos codificados por símbolos no ficheiro.
+     *
+     * @param levelName Nome do ficheiro do nível sem extensão (.txt)
+     */
     private void loadLevelFromFile(String levelName) {
         try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(Objects.requireNonNull(getClass().getResourceAsStream("/levels/" + levelName + ".txt"))))) {
-            //Para quando for dinamico, meter no metodo(String levelName): new InputStreamReader(getClass().getResourceAsStream("/levels/" + levelName + ".txt")))) {
 
             for (int row = 0; br.ready(); row++) {
                 String[] tokens = br.readLine().trim().split("\\s+");
@@ -322,64 +340,22 @@ public class SnowballGame extends Application implements View {
                     }
                 }
             }
-            model.saveState(); //Para o primeiro caso do undo redo
+            model.saveState(); // Guarda estado inicial para undo/redo
 
         } catch (Exception e) {
             System.err.println("Error loading level: " + e.getMessage());
         }
     }
 
+    // --- Interação com o Tabuleiro ---
 
-    private ImageView createCell(int row, int col) {
-        ImageView imageView = new ImageView();
-        imageView.setFitWidth(CELL_SIZE);
-        imageView.setFitHeight(CELL_SIZE);
-
-        String imagePath = getImagePath(row, col);
-
-        try {
-            Image img = new Image(Objects.requireNonNull(getClass().getResource(imagePath)).toExternalForm(),
-                    CELL_SIZE, CELL_SIZE, false, true);
-            imageView.setImage(img);
-        } catch (NullPointerException e) {
-            System.err.println("Error: image not found -> " + imagePath);
-        }
-
-        imageView.setOnMouseClicked(event -> handleCellClick(row, col));
-        return imageView;
-    }
-
-    private String getImagePath(int row, int col) {
-        // Se for a posição do monstro, mostrar a imagem do monstro na direção atual
-        if (model.getMonsterRow() == row && model.getMonsterCol() == col) {
-            String directionName = currentDirection.name().toLowerCase();
-            return "/images/monster_" + directionName + ".png";
-        }
-
-        // Se existir uma bola de neve na posição, mostrar a imagem correta
-        Snowball snowball = model.getSnowballManager().getSnowballAt(row, col);
-        if (snowball != null) {
-            return switch (snowball.getStatus()) {
-                case SMALL -> "/images/small_snowball.png";
-                case MEDIUM -> "/images/medium_snowball.png";
-                case LARGE -> "/images/big_snowball.png";
-                case MEDIUM_SMALL -> "/images/small_medium_snowballs.png";
-                case LARGE_SMALL -> "/images/small_big_snowballs.png";
-                case LARGE_MEDIUM -> "/images/medium_big_snowballs.png";
-                case FULL_SNOWMAN -> "/images/complete_snowman.png";
-            };
-        }
-
-        // Para o restante conteúdo do tabuleiro
-        return switch (model.getPositionContent(row, col)) {
-            case SNOW -> "/images/snow.png";
-            case BLOCK -> "/images/block.png";
-            case SNOWMAN -> "/images/complete_snowman.png";  // Usar nome correto da imagem
-            case NO_SNOW -> "/images/no_snow.png";
-        };
-    }
-
-    //TODO tem 21 ";"
+    /**
+     * Mét0do chamado quando o utilizador clica numa célula do tabuleiro.
+     * Verifica se o movimento do monstro é válido, atualiza a direção e move o monstro.
+     *
+     * @param targetRow Linha da célula clicada
+     * @param targetCol Coluna da célula clicada
+     */
     private void handleCellClick(int targetRow, int targetCol) {
         int currentRow = model.getMonsterRow();
         int currentCol = model.getMonsterCol();
@@ -387,35 +363,46 @@ public class SnowballGame extends Application implements View {
         int dRow = targetRow - currentRow;
         int dCol = targetCol - currentCol;
 
-        // Verifica se o movimento é válido (apenas uma célula na horizontal ou vertical)
+        // Só aceita movimentos para células adjacentes (sem diagonais)
         if (Math.abs(dRow) + Math.abs(dCol) != 1) return;
+
+        // Verifica se pode mover para a célula alvo
         if (!model.canMoveTo(targetRow, targetCol)) return;
 
-        // Salva a posição anterior em notação (linha, letra)
-        char oldColLetter = (char) ('A' + currentCol);
-        String oldPosition = "(" + (currentRow + 1) + ", " + oldColLetter + ")";
-
-        // Determina a direção
+        // Atualiza direção do monstro para desenhar sprite correto
         if (dRow == -1) currentDirection = MonsterDirections.UP;
         if (dRow == 1) currentDirection = MonsterDirections.DOWN;
         if (dCol == -1) currentDirection = MonsterDirections.LEFT;
         if (dCol == 1) currentDirection = MonsterDirections.RIGHT;
 
-        // Move o monstro
+        boardRenderer.setCurrentDirection(currentDirection);
+
+        // Move o monstro no modelo
         model.moveMonster(currentDirection);
 
-        moveCounterLabel.setText("Movements: " + model.getMoveCount());
-
-
-        // Obtém nova posição
         int newRow = model.getMonsterRow();
         int newCol = model.getMonsterCol();
+
+        // Atualiza labels e UI após movimento
+        updateAfterMonsterMove(currentRow, currentCol, newRow, newCol);
+        boardRenderer.drawBoard();
+    }
+
+    /**
+     * Atualiza a interface com o contador de movimentos e a posição do monstro.
+     *
+     * @param currentRow Linha antiga do monstro
+     * @param currentCol Coluna antiga do monstro
+     * @param newRow Linha nova do monstro
+     * @param newCol Coluna nova do monstro
+     */
+    private void updateAfterMonsterMove(int currentRow, int currentCol, int newRow, int newCol) {
+        moveCounterLabel.setText("Movements: " + model.getMoveCount());
+
+        char oldColLetter = (char) ('A' + currentCol);
+        String oldPosition = "(" + (currentRow + 1) + ", " + oldColLetter + ")";
         char newColLetter = (char) ('A' + newCol);
         String newPosition = "(" + (newRow + 1) + ", " + newColLetter + ")";
-
-        // Atualiza label para mostrar o movimento feito
-        monsterPositionLabel.setText("Movimento do Monstro: " + oldPosition + " -> " + newPosition);
-
-        drawBoard();
+        monsterPositionLabel.setText("Monster Movement: " + oldPosition + " -> " + newPosition);
     }
 }
