@@ -1,6 +1,7 @@
 package pt.ipbeja.po2.app.model;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pt.ipbeja.estig.po2.snowman.model.BoardModel;
 import pt.ipbeja.estig.po2.snowman.model.Monster;
@@ -9,6 +10,12 @@ import pt.ipbeja.estig.po2.snowman.model.PositionContent;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Martim Dias - 24290
+ *
+ * Testes unitários para verificar o movimento do monstro
+ * e restrições de movimento devido a obstáculos.
+ */
 public class MonsterTest {
 
     private BoardModel board;
@@ -29,8 +36,9 @@ public class MonsterTest {
     }
 
     /**
-     * Testar movimento do monstro para uma posição livre para a esquerda.
+     * Testa o movimento do monstro para a esquerda numa célula livre.
      */
+    @DisplayName("Monster moves left into a free cell")
     @Test
     void testMonsterToTheLeft() {
         assertEquals(2, board.getMonsterRow());
@@ -43,8 +51,9 @@ public class MonsterTest {
     }
 
     /**
-     * Testar movimento do monstro para uma posição livre para a esquerda.
+     * Testa o movimento do monstro para baixo numa célula livre.
      */
+    @DisplayName("Monster moves down into a free cell")
     @Test
     void testMonsterToDown() {
         assertEquals(2, board.getMonsterRow());
@@ -57,8 +66,9 @@ public class MonsterTest {
     }
 
     /**
-     * Testar que o monstro não se move para uma posição com BLOCK.
+     * Verifica que o monstro não se move para uma célula com bloco.
      */
+    @DisplayName("Monster blocked by a BLOCK cell")
     @Test
     void testBlockedByBlock() {
         board.setPositionContent(2, 3, PositionContent.BLOCK); // bloquear posição à direita

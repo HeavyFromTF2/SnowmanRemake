@@ -9,6 +9,7 @@ import java.util.List;
  * Martim Dias - 24290
  * TODO comentar totalmente esta classe E possivelmente separar para uma classe diferente as regras
  */
+
 public class BoardModel {
     private View view;
     public Monster monster;
@@ -258,7 +259,6 @@ public class BoardModel {
             view.showLevelCompletedDialog();
         }
     }
-
 
     // --- Log e ficheiros ---
     public void addMonsterPositionToLog() {
