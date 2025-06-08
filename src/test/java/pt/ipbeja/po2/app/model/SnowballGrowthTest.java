@@ -39,6 +39,7 @@ public class SnowballGrowthTest {
     @DisplayName("Small snowball grows to medium on snow")
     @Test
     void testCreateAverageSnowball() {
+        board.setPositionContent(2, 3, PositionContent.SNOW);
         Snowball small = new Snowball(2, 2, SnowballStatus.SMALL);
         board.getSnowballs().add(small);
 
@@ -56,6 +57,7 @@ public class SnowballGrowthTest {
     @DisplayName("Medium snowball grows to large on snow")
     @Test
     void testCreateBigSnowball() {
+        board.setPositionContent(2, 3, PositionContent.SNOW);
         Snowball medium = new Snowball(2, 2, SnowballStatus.MEDIUM);
         board.getSnowballs().add(medium);
 
@@ -73,6 +75,7 @@ public class SnowballGrowthTest {
     @DisplayName("Large snowball stays large and snow remains")
     @Test
     void testMaintainBigSnowball() {
+        board.setPositionContent(2, 3, PositionContent.SNOW);
         Snowball large = new Snowball(2, 2, SnowballStatus.LARGE);
         board.getSnowballs().add(large);
 

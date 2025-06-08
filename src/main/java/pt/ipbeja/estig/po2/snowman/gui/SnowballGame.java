@@ -48,9 +48,7 @@ public class SnowballGame extends Application implements View {
     AudioPlayer audioPlayer = new AudioPlayer();
     ScoreManager scoreManager = new ScoreManager();
 
-
     // --- Set do nome do Jogador ---
-
 
     /**
      * Define o nome do jogador atual.
@@ -60,9 +58,7 @@ public class SnowballGame extends Application implements View {
         this.playerName = playerName;
     }
 
-
     // --- Inicio do Jogo ---
-
 
     /**
      * Mét0do start padrão do JavaFX.
@@ -180,9 +176,7 @@ public class SnowballGame extends Application implements View {
         return mainLayout;
     }
 
-
     // --- Atualizações da Interface ---
-
 
     /**
      * Atualiza o tabuleiro visualmente chamando o BoardRenderer.
@@ -203,9 +197,7 @@ public class SnowballGame extends Application implements View {
         moveLog.clear();
     }
 
-
     // --- Controlo de Eventos do Jogo ---
-
 
     /**
      * Fecha a janela atual do jogo e retorna ao menu inicial.
@@ -252,9 +244,7 @@ public class SnowballGame extends Application implements View {
         audioPlayer.stop();
     }
 
-
     // --- Diálogos Finais e Scores ---
-
 
     /**
      * Mostra um diálogo de aviso quando o jogo não tem solução possível.
@@ -324,9 +314,7 @@ public class SnowballGame extends Application implements View {
         scoreBoxRight.setVisible(true);
     }
 
-
     // --- Carregamento de Nível ---
-
 
     /**
      * Lê o ficheiro do nível e popula o modelo com o conteúdo do tabuleiro.
@@ -359,9 +347,7 @@ public class SnowballGame extends Application implements View {
         }
     }
 
-
     // --- Interação com o Tabuleiro ---
-
 
     /**
      * Mét0do chamado quando o utilizador clica numa célula do tabuleiro.
